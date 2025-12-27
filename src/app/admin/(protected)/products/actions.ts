@@ -26,10 +26,10 @@ export async function createProduct(formData: FormData) {
         minQuantity: Number(formData.get("minQuantity")) || 1,
         stock: Number(formData.get("stock")) || 0,
         categoryId: (formData.get("categoryId") as string) === "none" ? undefined : (formData.get("categoryId") as string) || undefined,
-        isFeatured: formData.get("isFeatured") === "on",
-        isNew: formData.get("isNew") === "on",
-        isBestSeller: formData.get("isBestSeller") === "on",
-        isActive: formData.get("isActive") !== "off",
+        isFeatured: formData.get("isFeatured") === "true",
+        isNew: formData.get("isNew") === "true",
+        isBestSeller: formData.get("isBestSeller") === "true",
+        isActive: formData.get("isActive") !== "false",
     };
 
     const validatedData = productSchema.parse(rawData);
@@ -110,10 +110,10 @@ export async function updateProduct(productId: string, formData: FormData) {
         minQuantity: Number(formData.get("minQuantity")) || 1,
         stock: Number(formData.get("stock")) || 0,
         categoryId: (formData.get("categoryId") as string) === "none" ? undefined : (formData.get("categoryId") as string) || undefined,
-        isFeatured: formData.get("isFeatured") === "on",
-        isNew: formData.get("isNew") === "on",
-        isBestSeller: formData.get("isBestSeller") === "on",
-        isActive: formData.get("isActive") !== "off",
+        isFeatured: formData.get("isFeatured") === "true",
+        isNew: formData.get("isNew") === "true",
+        isBestSeller: formData.get("isBestSeller") === "true",
+        isActive: formData.get("isActive") !== "false",
     };
 
     const validatedData = productSchema.parse(rawData);

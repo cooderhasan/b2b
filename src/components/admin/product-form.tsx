@@ -213,12 +213,12 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
     return (
         <form onSubmit={handleSubmit} className="relative pb-24">
             <Tabs defaultValue="general" className="space-y-6">
-                <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-lg border flex flex-wrap h-auto sticky top-0 z-10 shadow-sm">
-                    <TabsTrigger value="general">Genel Bilgiler</TabsTrigger>
-                    <TabsTrigger value="price">Fiyat & Stok</TabsTrigger>
-                    <TabsTrigger value="variants">Varyantlar</TabsTrigger>
-                    <TabsTrigger value="media">Görseller</TabsTrigger>
-                    <TabsTrigger value="settings">Ayarlar</TabsTrigger>
+                <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-lg border flex flex-wrap h-auto sticky top-4 z-10 shadow-sm gap-2">
+                    <TabsTrigger value="general" className="px-4 py-2">Genel Bilgiler</TabsTrigger>
+                    <TabsTrigger value="price" className="px-4 py-2">Fiyat & Stok</TabsTrigger>
+                    <TabsTrigger value="variants" className="px-4 py-2">Varyantlar</TabsTrigger>
+                    <TabsTrigger value="media" className="px-4 py-2">Görseller</TabsTrigger>
+                    <TabsTrigger value="settings" className="px-4 py-2">Ayarlar</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="general" className="space-y-6">
@@ -608,6 +608,6 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                     )}
                 </Button>
             </div>
-        </form>
+        </form >
     );
 }

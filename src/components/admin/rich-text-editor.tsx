@@ -21,6 +21,8 @@ import {
     Heading2,
     Undo,
     Redo,
+    Eraser,
+    Code,
 } from "lucide-react";
 
 interface RichTextEditorProps {
@@ -31,6 +33,8 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
     const [isMounted, setIsMounted] = useState(false);
+    const [showSource, setShowSource] = useState(false);
+    const [sourceCode, setSourceCode] = useState("");
 
     const editor = useEditor({
         immediatelyRender: false,
@@ -207,30 +211,70 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
                     <LinkIcon className="h-4 w-4" />
                 </Button>
 
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                        if (window.confirm("Metnin içindeki GÖRÜNEN tüm HTML etiketlerini (<p>, <div> vb.) temizlemek ve satırları sıkılaştırmak istiyor musunuz?")) {
+                            // 1. Get the text content (which might include literal "<p>" strings if user pasted source code)
+                            let text = editor.getText();
+
+                            // 2. Remove literal HTML tags (e.g. user pasted "<b>Bolu</b>" generic text)
+                            text = text.replace(/<\/?[^>]+(>|$)/g, " ");
+
+                            // 3. Trim extra whitespace
+                            text = text.replace(/\s+/g, ' ').trim();
+
+                            // 4. Wrap in a single paragraph (Tiptap structure requirement)
+                            // Note: We use a simple paragraph. The result is just text.
+                            const cleanHtml = `<p>${text}</p>`;
+
+                            editor.commands.setContent(cleanHtml);
+                        }
+                    }}
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    title="Derinlemesine Temizlik (HTML Kodlarını Temizle)"
+                >
+                    <Eraser className="h-4 w-4" />
+                </Button>
+
                 <div className="w-px bg-gray-300 mx-1" />
 
                 <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => editor.chain().focus().undo().run()}
-                    disabled={!editor.can().undo()}
+                    onClick={() => {
+                        if (!showSource) {
+                            // Switching to Source Mode
+                            // Get current HTML and set it to local state for textarea
+                            setSourceCode(editor.getHTML());
+                        } else {
+                            // Switching back to Visual Mode
+                            // Save changes from textarea back to editor
+                            editor.commands.setContent(sourceCode);
+                        }
+                        setShowSource(!showSource);
+                    }}
+                    className={showSource ? "bg-blue-100 text-blue-700 hover:bg-blue-200" : ""}
+                    title="Kaynak Kodu (HTML) Düzenle"
                 >
-                    <Undo className="h-4 w-4" />
-                </Button>
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => editor.chain().focus().redo().run()}
-                    disabled={!editor.can().redo()}
-                >
-                    <Redo className="h-4 w-4" />
+                    <Code className="h-4 w-4" />
                 </Button>
             </div>
 
-            {/* Editor Content */}
-            <EditorContent editor={editor} />
+            {/* Editor Content or Source Textarea */}
+            {showSource ? (
+                <textarea
+                    value={sourceCode}
+                    onChange={(e) => setSourceCode(e.target.value)}
+                    className="w-full h-[200px] p-4 font-mono text-sm bg-gray-900 text-green-400 focus:outline-none resize-y"
+                    spellCheck={false}
+                />
+            ) : (
+                <EditorContent editor={editor} />
+            )}
         </div>
     );
 }

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { getSiteSettings } from "@/lib/settings";
 import { HeroSlider } from "@/components/storefront/hero-slider";
 import { FeaturedProducts } from "@/components/storefront/featured-products";
 import { CategorySection } from "@/components/storefront/category-section";
@@ -67,23 +68,34 @@ async function getHomeData() {
 export default async function HomePage() {
   const session = await auth();
   const data = await getHomeData();
+  const settings = await getSiteSettings();
   const discountRate = session?.user?.discountRate || 0;
   const isDealer =
     session?.user?.role === "DEALER" && session?.user?.status === "APPROVED";
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <StorefrontHeader user={session?.user} />
+      <StorefrontHeader
+        user={session?.user}
+        logoUrl={settings.logoUrl}
+        siteName={settings.siteName}
+        categories={data.categories}
+        phone={settings.phone}
+        facebookUrl={settings.facebookUrl}
+        instagramUrl={settings.instagramUrl}
+        twitterUrl={settings.twitterUrl}
+        linkedinUrl={settings.linkedinUrl}
+      />
       <main className="flex-1">
         <div className="space-y-16 pb-16">
           {/* Hero Slider */}
           <HeroSlider sliders={data.sliders} />
 
           {/* Features */}
-          <section className="container mx-auto px-4">
+          <section className="container mx-auto px-4 py-6">
             <div className="grid gap-6 md:grid-cols-3">
-              <div className="flex items-center gap-4 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                   <Truck className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
@@ -93,8 +105,8 @@ export default async function HomePage() {
                   <p className="text-sm text-gray-500">Aynı gün kargo</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div className="w-12 h-12 bg-green-50 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
                   <Shield className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
@@ -104,8 +116,8 @@ export default async function HomePage() {
                   <p className="text-sm text-gray-500">256-bit SSL</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
-                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+              <div className="flex items-center gap-4 p-5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
                   <HeadphonesIcon className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
@@ -168,6 +180,7 @@ export default async function HomePage() {
               products={data.featuredProducts}
               discountRate={discountRate}
               isDealer={isDealer}
+              variant="featured"
             />
           )}
 
@@ -179,6 +192,7 @@ export default async function HomePage() {
               discountRate={discountRate}
               isDealer={isDealer}
               badge="Yeni"
+              variant="new"
             />
           )}
 
@@ -190,11 +204,12 @@ export default async function HomePage() {
               discountRate={discountRate}
               isDealer={isDealer}
               badge="Popüler"
+              variant="bestseller"
             />
           )}
         </div>
       </main>
-      <StorefrontFooter />
+      <StorefrontFooter settings={settings} />
     </div>
   );
 }

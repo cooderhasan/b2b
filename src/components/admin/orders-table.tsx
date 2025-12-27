@@ -230,7 +230,14 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                 </TableRow>
                             ) : (
                                 orders.map((order) => (
-                                    <TableRow key={order.id}>
+                                    <TableRow
+                                        key={order.id}
+                                        className="cursor-pointer hover:bg-muted/50 transition-colors"
+                                        onClick={() => {
+                                            setSelectedOrder(order);
+                                            setIsOpen(true);
+                                        }}
+                                    >
                                         <TableCell className="font-medium">
                                             #{order.orderNumber}
                                         </TableCell>
@@ -248,32 +255,27 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                         <TableCell className="font-medium">
                                             {formatPrice(Number(order.total))}
                                         </TableCell>
-                                        <TableCell>
-                                            <div className="relative w-full max-w-[140px]">
-                                                {/* Visual Component (Badge) */}
-                                                <div className="flex items-center justify-between w-full h-8 px-3 py-2 text-sm border rounded-md border-input bg-transparent shadow-sm">
-                                                    <Badge className={getOrderStatusColor(order.status)}>
-                                                        {getOrderStatusLabel(order.status)}
-                                                    </Badge>
-                                                    <span className="opacity-50">▼</span>
-                                                </div>
-
-                                                {/* Functional Component (Invisible Native Select) */}
-                                                <select
-                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                                    disabled={loadingId === order.id}
+                                        <TableCell onClick={(e) => e.stopPropagation()}>
+                                            <div className="w-[180px]">
+                                                <Select
                                                     value={order.status}
-                                                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                                    onValueChange={(value) => handleStatusChange(order.id, value)}
+                                                    disabled={loadingId === order.id}
                                                 >
-                                                    {orderStatuses.filter(s => s.value !== 'ALL').map((status) => (
-                                                        <option key={status.value} value={status.value}>
-                                                            {status.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                    <SelectTrigger className={`h-8 border-transparent bg-transparent hover:bg-white/50 focus:ring-0 ${getOrderStatusColor(order.status)} border`}>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {orderStatuses.filter(s => s.value !== 'ALL').map((status) => (
+                                                            <SelectItem key={status.value} value={status.value}>
+                                                                {status.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                                             <div className="flex justify-end gap-2">
                                                 <Button
                                                     variant="ghost"
@@ -295,7 +297,8 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => {
+                                                    onClick={(e) => {
+                                                        e.stopPropagation(); // Double check
                                                         setSelectedOrder(order);
                                                         setIsOpen(true);
                                                     }}

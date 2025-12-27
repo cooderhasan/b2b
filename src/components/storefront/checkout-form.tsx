@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/stores/cart-store";
 import { Button } from "@/components/ui/button";
@@ -271,32 +272,48 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
                                 <CardTitle>Sipariş Özeti</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
-                                <div className="max-h-64 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-gray-200">
+                                <div className="max-h-80 overflow-y-auto space-y-4 p-2 pt-4 scrollbar-thin scrollbar-thumb-gray-200">
                                     {items.map((item) => (
                                         <div
                                             key={item.variantId ? `${item.productId}-${item.variantId}` : item.productId}
-                                            className="flex justify-between text-sm group"
+                                            className="flex gap-4 items-center group relative"
                                         >
-                                            <div className="flex-1 pr-2">
-                                                <div className="font-medium text-gray-900 dark:text-gray-100 flex items-start gap-2">
-                                                    <span className="bg-gray-100 dark:bg-gray-800 text-xs px-1.5 py-0.5 rounded min-w-[20px] text-center">
-                                                        {item.quantity}x
-                                                    </span>
-                                                    <span className="truncate block line-clamp-2">
-                                                        {item.name}
-                                                    </span>
+                                            {/* Image & Badge Wrapper */}
+                                            <div className="relative shrink-0">
+                                                <div className="h-16 w-16 border bg-white rounded-md overflow-hidden">
+                                                    {item.image ? (
+                                                        <Image
+                                                            src={item.image}
+                                                            alt={item.name}
+                                                            fill
+                                                            className="object-contain p-1"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-gray-400">
+                                                            Resim Yok
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                {item.variantInfo && (
-                                                    <p className="text-xs text-gray-500 pl-7 mt-0.5">{item.variantInfo}</p>
-                                                )}
+                                                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full shadow-md z-10 border border-white">
+                                                    {item.quantity}
+                                                </span>
                                             </div>
-                                            <div className="font-medium whitespace-nowrap">
-                                                {formatPrice(
-                                                    item.listPrice *
-                                                    item.quantity *
-                                                    (1 - discountRate / 100) *
-                                                    (1 + item.vatRate / 100)
+
+                                            {/* Name & Price */}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2 leading-tight" title={item.name}>
+                                                    {item.name}
+                                                </p>
+                                                {item.variantInfo && (
+                                                    <p className="text-xs text-gray-500 mt-1">{item.variantInfo}</p>
                                                 )}
+                                                <div className="mt-1 font-semibold text-gray-900 dark:text-white text-sm">
+                                                    {formatPrice(
+                                                        item.listPrice *
+                                                        item.quantity *
+                                                        (1 - discountRate / 100)
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

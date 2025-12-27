@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { getSiteSettings } from "@/lib/settings";
 import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/storefront/product-detail";
 
@@ -10,6 +11,7 @@ interface ProductPageProps {
 export default async function ProductPage({ params }: ProductPageProps) {
     const { slug } = await params;
     const session = await auth();
+    const settings = await getSiteSettings();
     const discountRate = session?.user?.discountRate || 0;
     const isDealer =
         (session?.user?.role === "DEALER" && session?.user?.status === "APPROVED") ||
@@ -73,6 +75,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
             discountRate={discountRate}
             isDealer={isDealer}
             isAuthenticated={isAuthenticated}
+            whatsappNumber={settings.whatsappNumber}
         />
     );
 }
+

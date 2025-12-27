@@ -36,10 +36,15 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
             <style>{`
                 @media print {
                     @page { margin: 0.5cm; }
-                    body { -webkit-print-color-adjust: exact; }
-                    .no-print { display: none !important; }
+                    body { -webkit-print-color-adjust: exact; background-color: white !important; }
+                    .no-print, header, aside { display: none !important; }
+                    /* Reset layout padding from admin layout */
+                    .lg\\:pl-64 { padding-left: 0 !important; }
+                    /* Ensure main content takes full width */
+                    main { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
                 }
             `}</style>
+
 
             {/* Auto-print script */}
             <script dangerouslySetInnerHTML={{ __html: 'window.onload = function() { window.print(); }' }} />
@@ -165,7 +170,7 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
 
             {/* Bank Info (Only if Bank Transfer) */}
             {order.payment?.method === "BANK_TRANSFER" && (settings.bankIban1 || settings.bankIban2) && (
-                <div className="mt-8 p-4 border rounded-lg bg-gray-50 border-gray-200">
+                <div className="mt-8 p-4 border rounded-lg border-gray-200">
                     <h4 className="font-bold text-gray-800 mb-2">Ödeme Yapılacak Banka Hesapları</h4>
                     <p className="text-sm text-gray-600 mb-2">Lütfen ödeme açıklamasında <strong>sipariş numaranızı (#{order.orderNumber})</strong> belirtiniz.</p>
                     <div className="space-y-1 text-sm font-mono text-gray-700">

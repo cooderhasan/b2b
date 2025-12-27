@@ -79,7 +79,7 @@ export function AdminSidebar() {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300",
+                    "fixed inset-y-0 left-0 z-50 flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 print:hidden",
                     collapsed ? "w-16" : "w-64",
                     "hidden lg:flex"
                 )}
@@ -154,7 +154,7 @@ export function AdminSidebar() {
             <Button
                 variant="outline"
                 size="icon"
-                className="lg:hidden fixed top-4 left-4 z-50"
+                className="lg:hidden fixed top-4 left-4 z-50 print:hidden"
             >
                 <Menu className="h-5 w-5" />
             </Button>

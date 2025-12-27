@@ -5,19 +5,22 @@ export const SHIPPING_FREE_LIMIT = 20000;
 /**
  * Calculate discounted price for a product based on dealer discount rate
  */
+/**
+ * Calculate discounted price for a product based on dealer discount rate
+ * NOTE: listPrice is treated as VAT-INCLUSIVE
+ */
 export function calculatePrice(
     listPrice: number,
     discountRate: number,
     vatRate: number
 ): PriceCalculation {
-    // Apply dealer discount
+    // 1. Calculate price after discount (still VAT-inclusive)
     const discountedPrice = listPrice * (1 - discountRate / 100);
 
-    // Calculate VAT
-    const vatAmount = discountedPrice * (vatRate / 100);
-
-    // Final price with VAT
-    const finalPrice = discountedPrice + vatAmount;
+    // 2. Calculate VAT amount from the inclusive price
+    // Formula: Price = Base * (1 + Rate) => Base = Price / (1 + Rate)
+    const basePrice = discountedPrice / (1 + vatRate / 100);
+    const vatAmount = discountedPrice - basePrice;
 
     return {
         listPrice,
@@ -25,37 +28,52 @@ export function calculatePrice(
         discountedPrice: roundPrice(discountedPrice),
         vatRate,
         vatAmount: roundPrice(vatAmount),
-        finalPrice: roundPrice(finalPrice),
+        finalPrice: roundPrice(discountedPrice),
     };
 }
 
 /**
  * Calculate cart summary with totals
+ * NOTE: item.listPrice is VAT-INCLUSIVE
  */
 export function calculateCartSummary(
     items: CartItem[],
     discountRate: number
 ): CartSummary {
-    let subtotal = 0;
+    let subtotal = 0; // Total price (VAT inclusive)
     let discountAmount = 0;
     let vatAmount = 0;
 
     items.forEach((item) => {
-        const itemSubtotal = item.listPrice * item.quantity;
-        const itemDiscount = itemSubtotal * (discountRate / 100);
-        const itemDiscounted = itemSubtotal - itemDiscount;
-        const itemVat = itemDiscounted * (item.vatRate / 100);
+        // Item total (VAT inclusive)
+        const itemTotal = item.listPrice * item.quantity;
 
-        subtotal += itemSubtotal;
+        // Discount amount
+        const itemDiscount = itemTotal * (discountRate / 100);
+
+        // Price after discount (VAT inclusive)
+        const itemDiscounted = itemTotal - itemDiscount;
+
+        // Calculate VAT from discounted price
+        const itemBase = itemDiscounted / (1 + item.vatRate / 100);
+        const itemVat = itemDiscounted - itemBase;
+
+        subtotal += itemTotal;
         discountAmount += itemDiscount;
         vatAmount += itemVat;
     });
 
-    const total = subtotal - discountAmount + vatAmount;
+    // Total to pay is simply subtotal minus discount
+    // (VAT is already inside)
+    const total = subtotal - discountAmount;
+
+    // Subtotal should be the Net Amount (Total - Vat)
+    // So that: Net Subtotal + VAT = Total
+    const netSubtotal = total - vatAmount;
 
     return {
         items,
-        subtotal: roundPrice(subtotal),
+        subtotal: roundPrice(netSubtotal),
         discountAmount: roundPrice(discountAmount),
         vatAmount: roundPrice(vatAmount),
         total: roundPrice(total),

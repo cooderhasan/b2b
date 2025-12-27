@@ -1,7 +1,8 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -27,15 +28,32 @@ export function SearchInput() {
     };
 
     return (
-        <form onSubmit={handleSearch} className="relative w-full max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-            <Input
-                type="search"
-                placeholder="Ürün ara..."
-                className="w-full bg-gray-50 dark:bg-gray-800 pl-9"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-            />
+        <form onSubmit={handleSearch} className="relative w-full">
+            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all overflow-hidden">
+                <div className="pl-4 text-gray-400">
+                    {isPending ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                        <Search className="h-5 w-5" />
+                    )}
+                </div>
+                <Input
+                    type="search"
+                    placeholder="Ürün adı, marka veya kategori ara..."
+                    className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm py-3 px-3"
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                />
+                <Button
+                    type="submit"
+                    size="sm"
+                    className="m-1 rounded-lg px-6"
+                    disabled={isPending}
+                >
+                    Ara
+                </Button>
+            </div>
         </form>
     );
 }
+

@@ -35,7 +35,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
         : user.email.slice(0, 2).toUpperCase();
 
     return (
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 sm:px-6 lg:px-8 print:hidden">
             <div className="flex-1">
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Yönetim Paneli

@@ -50,11 +50,10 @@ export function ProductCard({
     const hasVariants = product._count?.variants && product._count.variants > 0;
 
     const handleAddToCart = (e: React.MouseEvent) => {
-        e.preventDefault(); // Prevent Link navigation
+        e.preventDefault();
         e.stopPropagation();
 
         if (hasVariants) {
-            // Should not happen if UI is correct, but just in case
             return;
         }
 
@@ -91,29 +90,6 @@ export function ProductCard({
                             <span className="text-4xl">📦</span>
                         </div>
                     )}
-
-                    {/* Quick Action Overlay - Visible on Hover (or always on touch devices via media query if needed, but standard hover logic works for desktop) */}
-                    <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex justify-center bg-gradient-to-t from-black/50 to-transparent">
-                        {!hasVariants && product.stock > 0 ? (
-                            <Button
-                                size="sm"
-                                className="w-full shadow-lg bg-blue-600 hover:bg-blue-700 text-white border-none"
-                                onClick={handleAddToCart}
-                            >
-                                <ShoppingCart className="w-4 h-4 mr-2" />
-                                Sepete Ekle
-                            </Button>
-                        ) : (
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                className="w-full shadow-lg"
-                            >
-                                <Eye className="w-4 h-4 mr-2" />
-                                İncele
-                            </Button>
-                        )}
-                    </div>
 
                     {/* Badges */}
                     <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -162,7 +138,7 @@ export function ProductCard({
                             </>
                         ) : (
                             <p className="text-lg font-bold text-gray-900 dark:text-white">
-                                {formatPrice(product.listPrice * (1 + product.vatRate / 100))}
+                                {formatPrice(product.listPrice)}
                                 <span className="text-xs font-normal text-gray-500 ml-1">
                                     (KDV Dahil)
                                 </span>
@@ -176,6 +152,39 @@ export function ProductCard({
                             Min. sipariş: {product.minQuantity} adet
                         </p>
                     )}
+
+                    {/* Add to Cart / View Button - Visible on Hover */}
+                    <div className="opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out">
+                        {product.stock > 0 ? (
+                            hasVariants ? (
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="w-full mt-3 border-blue-500 text-blue-600 hover:bg-blue-50"
+                                >
+                                    <Eye className="w-4 h-4 mr-2" />
+                                    Seçenekleri Gör
+                                </Button>
+                            ) : (
+                                <button
+                                    onClick={handleAddToCart}
+                                    className="w-full mt-3 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                                >
+                                    <ShoppingCart className="w-4 h-4" />
+                                    Sepete Ekle
+                                </button>
+                            )
+                        ) : (
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                className="w-full mt-3"
+                                disabled
+                            >
+                                Stokta Yok
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </Link>

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ProductCard } from "./product-card";
-import { ArrowRight } from "lucide-react";
-import type { Decimal } from "@prisma/client/runtime/library";
+import { ArrowRight, ChevronRight } from "lucide-react";
 
 interface Product {
     id: string;
@@ -24,6 +23,7 @@ interface FeaturedProductsProps {
     discountRate: number;
     isDealer: boolean;
     badge?: string;
+    variant?: "featured" | "new" | "bestseller" | "default";
 }
 
 export function FeaturedProducts({
@@ -33,22 +33,26 @@ export function FeaturedProducts({
     isDealer,
     badge,
 }: FeaturedProductsProps) {
+    if (products.length === 0) return null;
+
     return (
         <section className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {/* Section Header */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
                     {title}
                 </h2>
                 <Link
                     href="/products"
-                    className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium"
+                    className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
                 >
                     Tümünü Gör
-                    <ArrowRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4" />
                 </Link>
             </div>
 
-            <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {/* Products Grid */}
+            <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {products.map((product) => (
                     <ProductCard
                         key={product.id}

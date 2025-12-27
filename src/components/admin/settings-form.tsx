@@ -58,14 +58,14 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
     return (
         <div className="space-y-6">
             <Tabs defaultValue="general" className="space-y-6">
-                <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-lg border flex flex-wrap h-auto">
-                    <TabsTrigger value="general">Genel & İletişim</TabsTrigger>
-                    <TabsTrigger value="branding">Marka & Görseller</TabsTrigger>
-                    <TabsTrigger value="seo">SEO & Meta</TabsTrigger>
-                    <TabsTrigger value="content">Sayfa İçerikleri</TabsTrigger>
-                    <TabsTrigger value="payment">Ödeme Bilgileri</TabsTrigger>
-                    <TabsTrigger value="social">Sosyal Medya</TabsTrigger>
-                    <TabsTrigger value="cargo">Kargo & Teslimat</TabsTrigger>
+                <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-lg border flex flex-wrap h-auto gap-2">
+                    <TabsTrigger value="general" className="px-4 py-2">Genel & İletişim</TabsTrigger>
+                    <TabsTrigger value="branding" className="px-4 py-2">Marka & Görseller</TabsTrigger>
+                    <TabsTrigger value="seo" className="px-4 py-2">SEO & Meta</TabsTrigger>
+                    <TabsTrigger value="content" className="px-4 py-2">Sayfa İçerikleri</TabsTrigger>
+                    <TabsTrigger value="payment" className="px-4 py-2">Ödeme Bilgileri</TabsTrigger>
+                    <TabsTrigger value="social" className="px-4 py-2">Sosyal Medya</TabsTrigger>
+                    <TabsTrigger value="cargo" className="px-4 py-2">Kargo & Teslimat</TabsTrigger>
                 </TabsList>
 
                 {/* Main Settings Form Wrapper */}
