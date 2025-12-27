@@ -1,65 +1,200 @@
-import Image from "next/image";
+import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { HeroSlider } from "@/components/storefront/hero-slider";
+import { FeaturedProducts } from "@/components/storefront/featured-products";
+import { CategorySection } from "@/components/storefront/category-section";
+import { StorefrontHeader } from "@/components/storefront/header";
+import { StorefrontFooter } from "@/components/storefront/footer";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Truck, Shield, HeadphonesIcon } from "lucide-react";
 
-export default function Home() {
+async function getHomeData() {
+  const [sliders, featuredProducts, newProducts, bestSellers, categories] =
+    await Promise.all([
+      prisma.slider.findMany({
+        where: { isActive: true },
+        orderBy: { order: "asc" },
+      }),
+      prisma.product.findMany({
+        where: { isActive: true, isFeatured: true },
+        include: { category: true },
+        take: 8,
+      }),
+      prisma.product.findMany({
+        where: { isActive: true, isNew: true },
+        include: { category: true },
+        take: 8,
+      }),
+      prisma.product.findMany({
+        where: { isActive: true, isBestSeller: true },
+        include: { category: true },
+        take: 8,
+      }),
+      prisma.category.findMany({
+        where: { isActive: true },
+        orderBy: { order: "asc" },
+      }),
+    ]);
+
+  // Helper to convert Decimal to number and Date to string
+  const transformProduct = (product: any) => ({
+    ...product,
+    listPrice: Number(product.listPrice),
+    createdAt: product.createdAt.toISOString(),
+    updatedAt: product.updatedAt.toISOString(),
+  });
+
+  const transformCategory = (category: any) => ({
+    ...category,
+    createdAt: category.createdAt.toISOString(),
+  });
+
+  const transformSlider = (slider: any) => ({
+    ...slider,
+    createdAt: slider.createdAt.toISOString(),
+  });
+
+  return {
+    sliders: sliders.map(transformSlider),
+    featuredProducts: featuredProducts.map(transformProduct),
+    newProducts: newProducts.map(transformProduct),
+    bestSellers: bestSellers.map(transformProduct),
+    categories: categories.map(transformCategory),
+  };
+}
+
+export default async function HomePage() {
+  const session = await auth();
+  const data = await getHomeData();
+  const discountRate = session?.user?.discountRate || 0;
+  const isDealer =
+    session?.user?.role === "DEALER" && session?.user?.status === "APPROVED";
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <StorefrontHeader user={session?.user} />
+      <main className="flex-1">
+        <div className="space-y-16 pb-16">
+          {/* Hero Slider */}
+          <HeroSlider sliders={data.sliders} />
+
+          {/* Features */}
+          <section className="container mx-auto px-4">
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="flex items-center gap-4 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                  <Truck className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                    Hızlı Teslimat
+                  </h3>
+                  <p className="text-sm text-gray-500">Aynı gün kargo</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                  <Shield className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                    Güvenli Ödeme
+                  </h3>
+                  <p className="text-sm text-gray-500">256-bit SSL</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                  <HeadphonesIcon className="h-6 w-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                    7/24 Destek
+                  </h3>
+                  <p className="text-sm text-gray-500">Her zaman yanınızda</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Dealer CTA - Only for non-dealers */}
+          {!isDealer && (
+            <section className="container mx-auto px-4">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 md:p-12 text-white">
+                <div className="max-w-2xl">
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4">
+                    Bayi Olun, Özel Fiyatlardan Yararlanın!
+                  </h2>
+                  <p className="text-blue-100 mb-6">
+                    Bayilerimize %20&apos;ye varan özel indirimler sunuyoruz. Hemen
+                    kayıt olun ve toptan alışverişin avantajlarını keşfedin.
+                  </p>
+                  <div className="flex flex-wrap gap-4">
+                    <Link href="/register">
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        className="bg-white text-blue-600 hover:bg-blue-50"
+                      >
+                        Bayi Kayıt
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Link href="/login">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="border-white text-white hover:bg-white/10"
+                      >
+                        Giriş Yap
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Categories */}
+          {data.categories.length > 0 && (
+            <CategorySection categories={data.categories} />
+          )}
+
+          {/* Featured Products */}
+          {data.featuredProducts.length > 0 && (
+            <FeaturedProducts
+              title="Öne Çıkan Ürünler"
+              products={data.featuredProducts}
+              discountRate={discountRate}
+              isDealer={isDealer}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          )}
+
+          {/* New Products */}
+          {data.newProducts.length > 0 && (
+            <FeaturedProducts
+              title="Yeni Ürünler"
+              products={data.newProducts}
+              discountRate={discountRate}
+              isDealer={isDealer}
+              badge="Yeni"
+            />
+          )}
+
+          {/* Best Sellers */}
+          {data.bestSellers.length > 0 && (
+            <FeaturedProducts
+              title="Çok Satanlar"
+              products={data.bestSellers}
+              discountRate={discountRate}
+              isDealer={isDealer}
+              badge="Popüler"
+            />
+          )}
         </div>
       </main>
+      <StorefrontFooter />
     </div>
   );
 }

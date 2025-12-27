@@ -1,0 +1,242 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { createBrand, updateBrand, deleteBrand } from "@/app/admin/(protected)/brands/actions";
+
+interface Brand {
+    id: string;
+    name: string;
+    slug: string;
+    logoUrl: string | null;
+    isActive: boolean;
+    createdAt: Date;
+    _count: {
+        products: number;
+    };
+}
+
+interface BrandsTableProps {
+    brands: Brand[];
+}
+
+export function BrandsTable({ brands }: BrandsTableProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [editBrand, setEditBrand] = useState<Brand | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [name, setName] = useState("");
+    const [logoUrl, setLogoUrl] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            if (editBrand) {
+                await updateBrand(editBrand.id, { name, logoUrl: logoUrl || undefined });
+                toast.success("Marka güncellendi.");
+            } else {
+                await createBrand({ name, logoUrl: logoUrl || undefined });
+                toast.success("Marka oluşturuldu.");
+            }
+            setIsOpen(false);
+            resetForm();
+        } catch {
+            toast.error("Bir hata oluştu.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm("Bu markayı silmek istediğinize emin misiniz?")) return;
+
+        try {
+            await deleteBrand(id);
+            toast.success("Marka silindi.");
+        } catch {
+            toast.error("Bir hata oluştu.");
+        }
+    };
+
+    const handleToggleStatus = async (id: string, isActive: boolean) => {
+        try {
+            await updateBrand(id, { isActive });
+            toast.success(isActive ? "Marka aktifleştirildi." : "Marka pasifleştirildi.");
+        } catch {
+            toast.error("Bir hata oluştu.");
+        }
+    };
+
+    const resetForm = () => {
+        setName("");
+        setLogoUrl("");
+        setEditBrand(null);
+    };
+
+    const openEditDialog = (brand: Brand) => {
+        setEditBrand(brand);
+        setName(brand.name);
+        setLogoUrl(brand.logoUrl || "");
+        setIsOpen(true);
+    };
+
+    const openNewDialog = () => {
+        resetForm();
+        setIsOpen(true);
+    };
+
+    return (
+        <>
+            <div className="flex justify-end mb-4">
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger asChild>
+                        <Button onClick={openNewDialog}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Yeni Marka
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>
+                                {editBrand ? "Marka Düzenle" : "Yeni Marka"}
+                            </DialogTitle>
+                            <DialogDescription>
+                                Marka bilgilerini girin
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleSubmit}>
+                            <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Marka Adı</Label>
+                                    <Input
+                                        id="name"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        placeholder="Örn: Apple"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="logoUrl">Logo URL (Opsiyonel)</Label>
+                                    <Input
+                                        id="logoUrl"
+                                        value={logoUrl}
+                                        onChange={(e) => setLogoUrl(e.target.value)}
+                                        placeholder="https://..."
+                                    />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                                    İptal
+                                </Button>
+                                <Button type="submit" disabled={loading}>
+                                    {loading ? "Kaydediliyor..." : "Kaydet"}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            </div>
+
+            <div className="rounded-lg border bg-white dark:bg-gray-800">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Logo</TableHead>
+                            <TableHead>Marka Adı</TableHead>
+                            <TableHead>Ürün Sayısı</TableHead>
+                            <TableHead>Durum</TableHead>
+                            <TableHead className="text-right">İşlemler</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {brands.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                                    Henüz marka bulunmuyor.
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            brands.map((brand) => (
+                                <TableRow key={brand.id}>
+                                    <TableCell>
+                                        {brand.logoUrl ? (
+                                            <img
+                                                src={brand.logoUrl}
+                                                alt={brand.name}
+                                                className="h-10 w-10 object-contain rounded"
+                                            />
+                                        ) : (
+                                            <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">
+                                                Logo
+                                            </div>
+                                        )}
+                                    </TableCell>
+                                    <TableCell className="font-medium">{brand.name}</TableCell>
+                                    <TableCell>
+                                        <Badge variant="secondary">
+                                            {brand._count.products} ürün
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Switch
+                                            checked={brand.isActive}
+                                            onCheckedChange={(checked) =>
+                                                handleToggleStatus(brand.id, checked)
+                                            }
+                                        />
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => openEditDialog(brand)}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                className="text-red-600 hover:text-red-700"
+                                                onClick={() => handleDelete(brand.id)}
+                                                disabled={brand._count.products > 0}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+        </>
+    );
+}

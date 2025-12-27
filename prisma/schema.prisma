@@ -1,0 +1,257 @@
+// Prisma schema for B2B E-Commerce Platform
+// PostgreSQL database with dealer-based discount system
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== ENUMS ====================
+
+enum UserRole {
+  GUEST
+  CUSTOMER
+  DEALER
+  OPERATOR
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CREDIT_CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// ==================== MODELS ====================
+
+model User {
+  id              String         @id @default(cuid())
+  email           String         @unique
+  passwordHash    String
+  companyName     String?
+  taxNumber       String?
+  phone           String?
+  address         String?
+  city            String?
+  district        String?
+  postalCode      String?
+  role            UserRole       @default(CUSTOMER)
+  status          UserStatus     @default(PENDING)
+  discountGroupId String?
+  discountGroup   DiscountGroup? @relation(fields: [discountGroupId], references: [id])
+  orders          Order[]
+  adminLogs       AdminLog[]     @relation("AdminActions")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("users")
+}
+
+model DiscountGroup {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  discountRate Decimal  @db.Decimal(5, 2)
+  isActive     Boolean  @default(true)
+  users        User[]
+  createdAt    DateTime @default(now())
+
+  @@map("discount_groups")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  order     Int       @default(0)
+  isActive  Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+
+  @@map("categories")
+}
+
+model Brand {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  logoUrl   String?
+  isActive  Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+
+  @@map("brands")
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  slug        String      @unique
+  sku         String?     @unique // Stok Kodu
+  barcode     String?     // Barkod
+  brandId     String?     // Marka ID
+  brand       Brand?      @relation(fields: [brandId], references: [id])
+  origin      String?     // Menşei
+  description String?     @db.Text // HTML içerik için Text tipi
+  listPrice   Decimal     @db.Decimal(12, 2)
+  vatRate     Int         @default(20)
+  minQuantity Int         @default(1)
+  stock       Int         @default(0)
+  images      String[]
+  isFeatured  Boolean     @default(false)
+  isNew       Boolean     @default(false)
+  isBestSeller Boolean    @default(false)
+  isActive    Boolean     @default(true)
+  categoryId  String?
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+  variants    ProductVariant[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id              String      @id @default(cuid())
+  productId       String
+  product         Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  color           String?     // Renk
+  size            String?     // Beden
+  sku             String?     // Varyant özel SKU
+  barcode         String?     // Varyant özel Barkod
+  stock           Int         @default(0)
+  priceAdjustment Decimal     @default(0) @db.Decimal(12, 2) // Fiyat farkı (+/-)
+  isActive        Boolean     @default(true)
+  orderItems      OrderItem[]
+  createdAt       DateTime    @default(now())
+
+  @@unique([productId, color, size])
+  @@map("product_variants")
+}
+
+model Order {
+  id                   String        @id @default(cuid())
+  orderNumber          String        @unique
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id])
+  subtotal             Decimal       @db.Decimal(12, 2)
+  discountAmount       Decimal       @db.Decimal(12, 2)
+  appliedDiscountRate  Decimal       @db.Decimal(5, 2)
+  vatAmount            Decimal       @db.Decimal(12, 2)
+  total                Decimal       @db.Decimal(12, 2)
+  status               OrderStatus   @default(PENDING)
+  shippingAddress      Json?
+  cargoCompany         String?       // Kargo Firması
+  trackingUrl          String?       // Kargo Takip Linki
+  notes                String?
+  items                OrderItem[]
+  payment              Payment?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String          @id @default(cuid())
+  orderId      String
+  order        Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product         @relation(fields: [productId], references: [id])
+  variantId    String?
+  variant      ProductVariant? @relation(fields: [variantId], references: [id])
+  productName  String
+  variantInfo  String?         // Sipariş anında varyant bilgisi (Renk: X, Beden: Y)
+  quantity     Int
+  unitPrice    Decimal         @db.Decimal(12, 2)
+  discountRate Decimal         @db.Decimal(5, 2)
+  vatRate      Int
+  lineTotal    Decimal         @db.Decimal(12, 2)
+
+  @@map("order_items")
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  orderId     String        @unique
+  order       Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method      PaymentMethod @default(BANK_TRANSFER)
+  status      PaymentStatus @default(PENDING)
+  amount      Decimal       @db.Decimal(12, 2)
+  providerRef String?
+  providerData Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+model SiteSettings {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model AdminLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation("AdminActions", fields: [adminId], references: [id])
+  action     String
+  entityType String
+  entityId   String?
+  oldData    Json?
+  newData    Json?
+  createdAt  DateTime @default(now())
+
+  @@map("admin_logs")
+}
+
+model Slider {
+  id        String   @id @default(cuid())
+  title     String?
+  subtitle  String?
+  imageUrl  String
+  linkUrl   String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("sliders")
+}
+
+model CargoCompany {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("cargo_companies")
+}
