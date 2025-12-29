@@ -25,11 +25,24 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog";
-import { Check, X, Eye, UserCheck } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Check, X, Eye, UserCheck, UserPlus, Loader2 } from "lucide-react";
 import { getUserStatusLabel, getUserStatusColor, formatDate } from "@/lib/helpers";
 import { toast } from "sonner";
-import { updateCustomerStatus, updateCustomerDiscountGroup } from "@/app/admin/(protected)/customers/actions";
+import { updateCustomerStatus, updateCustomerDiscountGroup, createCustomer, updateCustomerCreditLimit, getCustomerTransactions } from "@/app/admin/(protected)/customers/actions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatPrice } from "@/lib/helpers";
+import { useEffect } from "react";
+
+interface CustomersTableProps {
+    customers: any[];
+    discountGroups: any[];
+}
+
+// ... existing imports ...
 
 interface Customer {
     id: string;
@@ -41,6 +54,9 @@ interface Customer {
     role: string;
     status: string;
     createdAt: Date;
+    creditLimit: number;
+    currentDebt: number;
+    availableLimit: number;
     discountGroup: {
         id: string;
         name: string;
@@ -51,24 +67,53 @@ interface Customer {
     };
 }
 
-interface DiscountGroup {
-    id: string;
-    name: string;
-    discountRate: number | { toNumber(): number };
-}
-
-interface CustomersTableProps {
-    customers: Customer[];
-    discountGroups: DiscountGroup[];
-}
-
 export function CustomersTable({
     customers,
     discountGroups,
 }: CustomersTableProps) {
+    // ... (existing states)
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    // Credit Limit State
+    const [newCreditLimit, setNewCreditLimit] = useState("");
+    const [limitLoading, setLimitLoading] = useState(false);
+
+    // Transactions State
+    const [transactions, setTransactions] = useState<any[]>([]);
+    const [transactionsLoading, setTransactionsLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState("info");
+
+    useEffect(() => {
+        if (isOpen && activeTab === "finance" && selectedCustomer) {
+            const fetchTransactions = async () => {
+                setTransactionsLoading(true);
+                try {
+                    const data = await getCustomerTransactions(selectedCustomer.id);
+                    setTransactions(data);
+                } catch (error) {
+                    console.error(error);
+                    toast.error("Hareketler yüklenemedi");
+                } finally {
+                    setTransactionsLoading(false);
+                }
+            };
+            fetchTransactions();
+        }
+    }, [isOpen, activeTab, selectedCustomer]);
+
+    // Add Customer State
+    const [isAddOpen, setIsAddOpen] = useState(false);
+    const [addLoading, setAddLoading] = useState(false);
+    const [newCustomer, setNewCustomer] = useState({
+        companyName: "",
+        taxNumber: "",
+        email: "",
+        phone: "",
+        password: "",
+        discountGroupId: "",
+    });
 
     const handleApprove = async (customerId: string) => {
         setLoading(true);
@@ -106,8 +151,169 @@ export function CustomersTable({
         }
     };
 
+    const handleCreateCustomer = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setAddLoading(true);
+
+        if (!newCustomer.companyName || !newCustomer.email || !newCustomer.password) {
+            toast.error("Lütfen zorunlu alanları doldurun.");
+            setAddLoading(false);
+            return;
+        }
+
+        try {
+            const result = await createCustomer(newCustomer);
+            if (result.success) {
+                toast.success("Müşteri başarıyla oluşturuldu.");
+                setIsAddOpen(false);
+                setNewCustomer({
+                    companyName: "",
+                    taxNumber: "",
+                    email: "",
+                    phone: "",
+                    password: "",
+                    discountGroupId: "",
+                });
+            } else {
+                toast.error(result.error || "Müşteri oluşturulurken bir hata oluştu.");
+            }
+        } catch {
+            toast.error("Bir hata oluştu.");
+        } finally {
+            setAddLoading(false);
+        }
+    };
+
+    // ... (existing handlers)
+
+    const handleUpdateCreditLimit = async () => {
+        if (!selectedCustomer) return;
+        setLimitLoading(true);
+
+        try {
+            await updateCustomerCreditLimit(selectedCustomer.id, Number(newCreditLimit));
+            toast.success("Kredi limiti güncellendi.");
+            setNewCreditLimit("");
+            // Optimistic update or refresh needed. RevalidatePath handles refresh usually.
+        } catch {
+            toast.error("Bir hata oluştu.");
+        } finally {
+            setLimitLoading(false);
+        }
+    }
+
     return (
-        <>
+        <div className="space-y-4">
+            {/* ... (New Customer Dialog Trigger and Content - NO CHANGE NEEDED HERE) ... */}
+            {/* But to save tokens I will cut the middle part out using comments if tool allows, but replace_file_content replaces a block. 
+               I will just replace the render part of Detail Dialog primarily.
+           */}
+            <div className="flex justify-end">
+                <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            Yeni Müşteri Ekle
+                        </Button>
+                    </DialogTrigger>
+                    {/* ... (rest of Add Customer Dialog) ... */}
+                    <DialogContent className="sm:max-w-[500px]">
+                        <form onSubmit={handleCreateCustomer}>
+                            <DialogHeader>
+                                <DialogTitle>Yeni Müşteri Ekle</DialogTitle>
+                                <DialogDescription>
+                                    Müşteriyi manuel olarak ekleyin ve bayi grubunu seçin. Müşteri direkt onaylı olacaktır.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="companyName">Firma Adı *</Label>
+                                        <Input
+                                            id="companyName"
+                                            value={newCustomer.companyName}
+                                            onChange={(e) => setNewCustomer({ ...newCustomer, companyName: e.target.value })}
+                                            placeholder="Firma Adı"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="taxNumber">Vergi No / T.C.</Label>
+                                        <Input
+                                            id="taxNumber"
+                                            value={newCustomer.taxNumber}
+                                            onChange={(e) => setNewCustomer({ ...newCustomer, taxNumber: e.target.value })}
+                                            placeholder="VKN"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email">E-posta *</Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            value={newCustomer.email}
+                                            onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                                            placeholder="ornek@email.com"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="phone">Telefon</Label>
+                                        <Input
+                                            id="phone"
+                                            value={newCustomer.phone}
+                                            onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                                            placeholder="0555..."
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Şifre *</Label>
+                                    <Input
+                                        id="password"
+                                        type="text" // Admin görüyor, text olabilir veya password
+                                        value={newCustomer.password}
+                                        onChange={(e) => setNewCustomer({ ...newCustomer, password: e.target.value })}
+                                        placeholder="Geçici şifre belirleyin"
+                                        required
+                                    />
+                                    <p className="text-[10px] text-gray-500">Müşteriye iletmek üzere not alınız.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="discountGroup">İskonto Grubu</Label>
+                                    <Select
+                                        value={newCustomer.discountGroupId}
+                                        onValueChange={(value) => setNewCustomer({ ...newCustomer, discountGroupId: value })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Grup Seçin" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {discountGroups.map((group) => (
+                                                <SelectItem key={group.id} value={group.id}>
+                                                    {group.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>
+                                    İptal
+                                </Button>
+                                <Button type="submit" disabled={addLoading}>
+                                    {addLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Kaydet
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            </div>
+
             <div className="rounded-lg border bg-white dark:bg-gray-800">
                 <Table>
                     <TableHeader>
@@ -203,6 +409,7 @@ export function CustomersTable({
                                                 variant="ghost"
                                                 onClick={() => {
                                                     setSelectedCustomer(customer);
+                                                    setNewCreditLimit(String(customer.creditLimit || 0));
                                                     setIsOpen(true);
                                                 }}
                                             >
@@ -219,58 +426,155 @@ export function CustomersTable({
 
             {/* Customer Detail Dialog */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent>
+                <DialogContent className="max-w-2xl">
                     <DialogHeader>
                         <DialogTitle>Müşteri Detayı</DialogTitle>
                         <DialogDescription>
                             {selectedCustomer?.companyName || selectedCustomer?.email}
                         </DialogDescription>
                     </DialogHeader>
+
                     {selectedCustomer && (
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p className="text-sm text-gray-500">Firma Adı</p>
-                                    <p className="font-medium">
-                                        {selectedCustomer.companyName || "-"}
-                                    </p>
+                        <Tabs defaultValue="info" className="w-full" onValueChange={setActiveTab}>
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="info">Genel Bilgiler</TabsTrigger>
+                                <TabsTrigger value="finance">Finans / Cari</TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="info" className="space-y-4 pt-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-500">Firma Adı</p>
+                                        <p className="font-medium">
+                                            {selectedCustomer.companyName || "-"}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Vergi No</p>
+                                        <p className="font-medium">
+                                            {selectedCustomer.taxNumber || "-"}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">E-posta</p>
+                                        <p className="font-medium">{selectedCustomer.email}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Telefon</p>
+                                        <p className="font-medium">{selectedCustomer.phone || "-"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Şehir</p>
+                                        <p className="font-medium">{selectedCustomer.city || "-"}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Kayıt Tarihi</p>
+                                        <p className="font-medium">
+                                            {formatDate(selectedCustomer.createdAt)}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Durum</p>
+                                        <Badge className={getUserStatusColor(selectedCustomer.status)}>
+                                            {getUserStatusLabel(selectedCustomer.status)}
+                                        </Badge>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">Toplam Sipariş</p>
+                                        <p className="font-medium">{selectedCustomer._count.orders}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Vergi No</p>
-                                    <p className="font-medium">
-                                        {selectedCustomer.taxNumber || "-"}
-                                    </p>
+                            </TabsContent>
+
+                            <TabsContent value="finance" className="space-y-6 pt-4">
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                                        <p className="text-sm text-gray-500 mb-1">Toplam Kredi Limiti</p>
+                                        <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatPrice(selectedCustomer.creditLimit)}</p>
+                                    </div>
+                                    <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-lg">
+                                        <p className="text-sm text-red-500 mb-1">Güncel Borç</p>
+                                        <p className="text-lg font-bold text-red-700 dark:text-red-400">{formatPrice(selectedCustomer.currentDebt)}</p>
+                                    </div>
+                                    <div className="bg-green-50 dark:bg-green-900/10 p-4 rounded-lg">
+                                        <p className="text-sm text-green-500 mb-1">Kullanılabilir Limit</p>
+                                        <p className="text-lg font-bold text-green-700 dark:text-green-400">{formatPrice(selectedCustomer.availableLimit)}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">E-posta</p>
-                                    <p className="font-medium">{selectedCustomer.email}</p>
+
+                                <div className="space-y-4 border-t pt-4">
+                                    <h3 className="text-sm font-semibold">Limit Güncelleme</h3>
+                                    <div className="flex gap-4 items-end">
+                                        <div className="space-y-2 flex-1">
+                                            <Label htmlFor="creditLimit">Kredi Limiti (TL)</Label>
+                                            <Input
+                                                id="creditLimit"
+                                                type="number"
+                                                value={newCreditLimit}
+                                                onChange={(e) => setNewCreditLimit(e.target.value)}
+                                                placeholder="0.00"
+                                            />
+                                        </div>
+                                        <Button
+                                            onClick={handleUpdateCreditLimit}
+                                            disabled={limitLoading || !newCreditLimit}
+                                        >
+                                            {limitLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            Güncelle
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Telefon</p>
-                                    <p className="font-medium">{selectedCustomer.phone || "-"}</p>
+
+                                <div className="space-y-4 border-t pt-4">
+                                    <h3 className="text-sm font-semibold">Son Hesap Hareketleri</h3>
+                                    <div className="border rounded-lg max-h-[300px] overflow-y-auto">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead className="w-[100px]">Tarih</TableHead>
+                                                    <TableHead>İşlem</TableHead>
+                                                    <TableHead>Açıklama</TableHead>
+                                                    <TableHead className="text-right">Tutar</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {transactionsLoading ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={4} className="text-center py-4">
+                                                            <Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" />
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : transactions.length === 0 ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                                                            Kayıt bulunamadı.
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : (
+                                                    transactions.map((t: any) => (
+                                                        <TableRow key={t.id}>
+                                                            <TableCell className="text-xs">{formatDate(t.createdAt)}</TableCell>
+                                                            <TableCell>
+                                                                <Badge variant="outline" className={t.type === "DEBIT" ? "text-red-600 bg-red-50 border-red-200" : "text-green-600 bg-green-50 border-green-200"}>
+                                                                    {t.type === "DEBIT" ? "Borç" : "Alacak"}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell className="text-xs">
+                                                                <div>{t.description}</div>
+                                                                {t.documentNo && <div className="text-gray-400">Belge: {t.documentNo}</div>}
+                                                            </TableCell>
+                                                            <TableCell className={`text-right text-xs font-mono font-medium ${t.type === "DEBIT" ? "text-red-600" : "text-green-600"}`}>
+                                                                {t.type === "DEBIT" ? "-" : "+"}{formatPrice(t.amount)}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Şehir</p>
-                                    <p className="font-medium">{selectedCustomer.city || "-"}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Kayıt Tarihi</p>
-                                    <p className="font-medium">
-                                        {formatDate(selectedCustomer.createdAt)}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Durum</p>
-                                    <Badge className={getUserStatusColor(selectedCustomer.status)}>
-                                        {getUserStatusLabel(selectedCustomer.status)}
-                                    </Badge>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Toplam Sipariş</p>
-                                    <p className="font-medium">{selectedCustomer._count.orders}</p>
-                                </div>
-                            </div>
-                        </div>
+                            </TabsContent>
+                        </Tabs>
                     )}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsOpen(false)}>
@@ -279,6 +583,6 @@ export function CustomersTable({
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </>
+        </div>
     );
 }

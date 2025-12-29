@@ -23,7 +23,8 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, X } from "lucide-react";
+import Image from "next/image";
 import { toast } from "sonner";
 import { createSlider, updateSlider, deleteSlider, toggleSliderStatus } from "@/app/admin/(protected)/sliders/actions";
 
@@ -51,9 +52,46 @@ export function SlidersTable({ sliders }: SlidersTableProps) {
     const [imageUrl, setImageUrl] = useState("");
     const [linkUrl, setLinkUrl] = useState("");
     const [order, setOrder] = useState(0);
+    const [uploading, setUploading] = useState(false);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const response = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setImageUrl(data.url);
+                toast.success("Görsel yüklendi.");
+            } else {
+                toast.error("Görsel yüklenirken hata oluştu.");
+            }
+        } catch (error) {
+            console.error("Upload error", error);
+            toast.error("Görsel yüklenirken hata oluştu.");
+        } finally {
+            setUploading(false);
+        }
+        e.target.value = ""; // Reset input
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!imageUrl) {
+            toast.error("Lütfen bir görsel yükleyin.");
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -157,14 +195,56 @@ export function SlidersTable({ sliders }: SlidersTableProps) {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="imageUrl">Görsel URL</Label>
-                                    <Input
-                                        id="imageUrl"
-                                        value={imageUrl}
-                                        onChange={(e) => setImageUrl(e.target.value)}
-                                        placeholder="https://..."
-                                        required
-                                    />
+                                    <Label>Görsel</Label>
+                                    {imageUrl ? (
+                                        <div className="relative w-full h-[150px] rounded-md overflow-hidden border">
+                                            <button
+                                                type="button"
+                                                onClick={() => setImageUrl("")}
+                                                className="absolute top-2 right-2 z-10 bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                            <Image
+                                                fill
+                                                className="object-cover"
+                                                alt="Slider görseli"
+                                                src={imageUrl}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <label
+                                            htmlFor="slider-image-upload"
+                                            className={`
+                                                cursor-pointer
+                                                flex flex-col items-center justify-center
+                                                w-full h-[150px]
+                                                border-2 border-dashed border-gray-300 rounded-md
+                                                hover:bg-gray-50 transition-colors
+                                                ${uploading ? "opacity-50 cursor-not-allowed" : ""}
+                                            `}
+                                        >
+                                            <div className="flex flex-col items-center justify-center">
+                                                {uploading ? (
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+                                                ) : (
+                                                    <>
+                                                        <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                                                        <p className="text-sm text-gray-500">Görsel Yükle</p>
+                                                        <p className="text-xs text-gray-400 mt-1">PNG, JPG, WEBP</p>
+                                                    </>
+                                                )}
+                                            </div>
+                                            <input
+                                                id="slider-image-upload"
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleFileUpload}
+                                                disabled={uploading}
+                                            />
+                                        </label>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="linkUrl">Link URL</Label>

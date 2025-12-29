@@ -57,6 +57,7 @@ interface Product {
     vatRate: number;
     minQuantity: number;
     stock: number;
+    criticalStock: number;
     categoryId: string | null;
     images: string[];
     isFeatured: boolean;
@@ -91,6 +92,7 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
         vatRate: product?.vatRate?.toString() || "20",
         minQuantity: product?.minQuantity || 1,
         stock: product?.stock || 0,
+        criticalStock: product?.criticalStock || 10,
         images: product?.images || [] as string[],
         variants: product?.variants || [] as ProductVariant[],
         isActive: product?.isActive ?? true,
@@ -355,7 +357,7 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                 </div>
                             </div>
 
-                            <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid gap-4 md:grid-cols-3">
                                 <div className="space-y-2">
                                     <Label htmlFor="stock">Stok Adedi</Label>
                                     <Input
@@ -364,6 +366,17 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
                                         value={formData.stock}
                                         onChange={(e) => handleChange("stock", e.target.value)}
                                     />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="criticalStock">Kritik Stok Seviyesi</Label>
+                                    <Input
+                                        id="criticalStock"
+                                        type="number"
+                                        value={formData.criticalStock}
+                                        onChange={(e) => handleChange("criticalStock", e.target.value)}
+                                        placeholder="10"
+                                    />
+                                    <p className="text-xs text-gray-500">Stok bu seviyeye düştüğünde uyarı gösterilir</p>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="minQuantity">Min. Sipariş Adedi</Label>

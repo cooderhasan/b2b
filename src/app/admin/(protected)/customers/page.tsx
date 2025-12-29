@@ -8,6 +8,12 @@ export default async function CustomersPage() {
         },
         include: {
             discountGroup: true,
+            transactions: {
+                select: {
+                    type: true,
+                    amount: true,
+                }
+            },
             _count: {
                 select: { orders: true },
             },
@@ -20,13 +26,32 @@ export default async function CustomersPage() {
         orderBy: { discountRate: "asc" },
     });
 
-    const serializedCustomers = customers.map(customer => ({
-        ...customer,
-        discountGroup: customer.discountGroup ? {
-            ...customer.discountGroup,
-            discountRate: Number(customer.discountGroup.discountRate)
-        } : null
-    }));
+    const serializedCustomers = customers.map(customer => {
+        const totalDebit = customer.transactions
+            .filter(t => t.type === "DEBIT")
+            .reduce((acc, t) => acc + Number(t.amount), 0);
+
+        const totalCredit = customer.transactions
+            .filter(t => t.type === "CREDIT")
+            .reduce((acc, t) => acc + Number(t.amount), 0);
+
+        const currentDebt = totalDebit - totalCredit;
+
+        // Destructure to separate Decimal fields and exclude raw transactions
+        const { transactions, creditLimit, riskLimit, discountGroup, ...otherFields } = customer;
+
+        return {
+            ...otherFields,
+            creditLimit: Number(creditLimit),
+            riskLimit: Number(riskLimit),
+            currentDebt,
+            availableLimit: Number(creditLimit) - currentDebt,
+            discountGroup: discountGroup ? {
+                ...discountGroup,
+                discountRate: Number(discountGroup.discountRate)
+            } : null
+        };
+    });
 
     const serializedDiscountGroups = discountGroups.map(group => ({
         ...group,

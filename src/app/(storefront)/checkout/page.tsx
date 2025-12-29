@@ -15,16 +15,46 @@ export default async function CheckoutPage() {
                 address: true,
                 city: true,
                 district: true,
+                creditLimit: true,
+                transactions: {
+                    select: {
+                        type: true,
+                        amount: true,
+                    }
+                }
             },
         });
 
         if (user) {
+            // Address Info
             initialData = {
                 name: user.companyName || "",
                 phone: user.phone || "",
                 address: user.address || "",
                 city: user.city || "",
                 district: user.district || "",
+            };
+
+            // Current Account Logic
+            const totalDebit = user.transactions
+                .filter(t => t.type === "DEBIT")
+                .reduce((acc, t) => acc + Number(t.amount), 0);
+
+            const totalCredit = user.transactions
+                .filter(t => t.type === "CREDIT")
+                .reduce((acc, t) => acc + Number(t.amount), 0);
+
+            const currentDebt = totalDebit - totalCredit;
+            const creditLimit = Number(user.creditLimit);
+            const availableLimit = creditLimit - currentDebt;
+
+            initialData = {
+                ...initialData,
+                currentAccount: {
+                    creditLimit,
+                    currentDebt,
+                    availableLimit: availableLimit > 0 ? availableLimit : 0
+                }
             };
         }
     }

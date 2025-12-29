@@ -38,6 +38,7 @@ enum OrderStatus {
 enum PaymentMethod {
   BANK_TRANSFER
   CREDIT_CARD
+  CURRENT_ACCOUNT // Cari Hesap / Açık Hesap
 }
 
 enum PaymentStatus {
@@ -45,6 +46,16 @@ enum PaymentStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+enum QuoteStatus {
+  PENDING     // Müşteri talep etti
+  REVIEWING   // Admin inceliyor
+  QUOTED      // Teklif verildi
+  ACCEPTED    // Müşteri kabul etti
+  REJECTED    // Reddedildi
+  EXPIRED     // Süresi doldu
+  CONVERTED   // Siparişe dönüştürüldü
 }
 
 // ==================== MODELS ====================
@@ -65,11 +76,54 @@ model User {
   discountGroupId String?
   discountGroup   DiscountGroup? @relation(fields: [discountGroupId], references: [id])
   orders          Order[]
+  quotes          Quote[]
   adminLogs       AdminLog[]     @relation("AdminActions")
   createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  updatedAt       DateTime       @updatedAt  
+
+  // Current Account / Bakiye Sistemi
+  creditLimit      Decimal        @default(0)   // Tanımlı Kredi Limiti
+  riskLimit        Decimal        @default(0)   // Risk Limiti (Opsiyonel)
+  transactions     CurrentAccountTransaction[]  // Hesap Hareketleri
 
   @@map("users")
+}
+
+// ==================== CURRENT ACCOUNT TYPES ====================
+
+enum TransactionType {
+  DEBIT    // BORÇ (Sipariş vb. - Müşterinin borçlanması)
+  CREDIT   // ALACAK (Ödeme vb. - Müşterinin ödeme yapması)
+}
+
+enum ProcessType {
+  ORDER         // Sipariş kaynaklı
+  PAYMENT       // Ödeme / Tahsilat
+  REFUND        // İade
+  ADJUSTMENT    // Manuel Düzeltme / Virman
+  OPENING_BALANCE // Açılış Bakiyesi
+}
+
+// Cari Hesap Hareketleri
+model CurrentAccountTransaction {
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  
+  type            TransactionType
+  processType     ProcessType
+  amount          Decimal         @default(0)
+  description     String?         // İşlem açıklaması
+  documentNo      String?         // Fatura No / Dekont No
+  
+  orderId         String?         // Varsa ilişkili sipariş
+  order           Order?          @relation(fields: [orderId], references: [id])
+  
+  createdBy       String?         // İşlemi yapan admin (email/id)
+  createdAt       DateTime        @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model DiscountGroup {
@@ -121,6 +175,7 @@ model Product {
   vatRate     Int         @default(20)
   minQuantity Int         @default(1)
   stock       Int         @default(0)
+  criticalStock Int       @default(10) // Kritik stok seviyesi
   images      String[]
   isFeatured  Boolean     @default(false)
   isNew       Boolean     @default(false)
@@ -129,6 +184,7 @@ model Product {
   categoryId  String?
   category    Category?   @relation(fields: [categoryId], references: [id])
   orderItems  OrderItem[]
+  quoteItems  QuoteItem[]
   variants    ProductVariant[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -171,6 +227,7 @@ model Order {
   notes                String?
   items                OrderItem[]
   payment              Payment?
+  transactions         CurrentAccountTransaction[] // Cari hareket bağlantısı
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
 
@@ -254,4 +311,40 @@ model CargoCompany {
   updatedAt DateTime @updatedAt
 
   @@map("cargo_companies")
+}
+
+// ==================== QUOTE SYSTEM ====================
+
+model Quote {
+  id          String      @id @default(cuid())
+  quoteNumber String      @unique
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  status      QuoteStatus @default(PENDING)
+  items       QuoteItem[]
+  notes       String?     @db.Text  // Müşteri notu
+  adminNotes  String?     @db.Text  // Admin notu
+  subtotal    Decimal?    @db.Decimal(12, 2)
+  discount    Decimal?    @db.Decimal(12, 2)
+  total       Decimal?    @db.Decimal(12, 2)
+  validUntil  DateTime?   // Teklif geçerlilik süresi
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("quotes")
+}
+
+model QuoteItem {
+  id          String   @id @default(cuid())
+  quoteId     String
+  quote       Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  productName String
+  quantity    Int
+  listPrice   Decimal  @db.Decimal(12, 2)  // Liste fiyatı
+  quotedPrice Decimal? @db.Decimal(12, 2)  // Teklif fiyatı
+  lineTotal   Decimal? @db.Decimal(12, 2)
+
+  @@map("quote_items")
 }

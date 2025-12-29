@@ -344,130 +344,140 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
 
             {/* Order Detail Dialog */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-5xl min-w-[900px]">
                     <DialogHeader>
                         <DialogTitle>
                             Sipariş Detayı - {selectedOrder?.orderNumber}
                         </DialogTitle>
                     </DialogHeader>
                     {selectedOrder && (
-                        <div className="space-y-6">
-                            {/* Customer Info */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <h4 className="font-semibold mb-2">Müşteri Bilgileri</h4>
-                                    <div className="text-sm space-y-1 text-gray-600 dark:text-gray-300">
-                                        <p>
-                                            <span className="font-medium">Firma/Ad:</span>{" "}
-                                            {selectedOrder.user.companyName ||
-                                                selectedOrder.user.email}
-                                        </p>
-                                        <p>
-                                            <span className="font-medium">Email:</span>{" "}
-                                            {selectedOrder.user.email}
-                                        </p>
-                                        <p>
-                                            <span className="font-medium">Telefon:</span>{" "}
-                                            {selectedOrder.user.phone || "-"}
+                        <div className="space-y-4">
+                            {/* Top Grid: Customer, Address, Cargo/Status - 3 Columns */}
+                            <div className="grid grid-cols-3 gap-6">
+                                {/* Column 1: Customer Info */}
+                                <div className="space-y-4">
+                                    <div>
+                                        <h4 className="font-semibold mb-2 text-sm flex items-center gap-2">
+                                            <span className="bg-blue-100 text-blue-700 p-1 rounded">👤</span> Müşteri Bilgileri
+                                        </h4>
+                                        <div className="text-sm space-y-1 text-gray-600 dark:text-gray-300 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                                            <p className="font-medium text-gray-900 dark:text-gray-100">
+                                                {selectedOrder.user.companyName || selectedOrder.user.email}
+                                            </p>
+                                            <p>{selectedOrder.user.email}</p>
+                                            <p>{selectedOrder.user.phone || "-"}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold mb-2 text-sm">Sipariş Notu</h4>
+                                        <p className="text-sm text-gray-600 dark:text-gray-300 italic bg-yellow-50 p-2 rounded border border-yellow-100">
+                                            {selectedOrder.notes || "Not yok."}
                                         </p>
                                     </div>
                                 </div>
-                                <div>
-                                    <h4 className="font-semibold mb-2">Sipariş Notu</h4>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300 italic">
-                                        {selectedOrder.notes || "Not yok."}
-                                    </p>
-                                </div>
-                            </div>
 
-                            {/* Shipping Address & Tracking */}
-                            <div className="grid grid-cols-2 gap-4">
+                                {/* Column 2: Shipping Address */}
                                 <div>
-                                    <h4 className="font-semibold mb-2">Teslimat Adresi</h4>
-                                    <div className="text-sm text-gray-600 dark:text-gray-300 p-3 bg-gray-50 dark:bg-gray-800 rounded-md h-full">
+                                    <h4 className="font-semibold mb-2 text-sm flex items-center gap-2">
+                                        <span className="bg-green-100 text-green-700 p-1 rounded">📍</span> Teslimat Adresi
+                                    </h4>
+                                    <div className="text-sm text-gray-600 dark:text-gray-300 p-3 bg-gray-50 dark:bg-gray-800 rounded-md h-[calc(100%-32px)]">
                                         {selectedOrder.shippingAddress ? (
                                             <>
-                                                <p className="font-bold">{(selectedOrder.shippingAddress as any).title}</p>
+                                                <p className="font-bold text-gray-900 dark:text-gray-100 mb-1">{(selectedOrder.shippingAddress as any).title}</p>
                                                 <p>{(selectedOrder.shippingAddress as any).address}</p>
-                                                <p>{(selectedOrder.shippingAddress as any).district} / {(selectedOrder.shippingAddress as any).city}</p>
-                                                <p>Tel: {(selectedOrder.shippingAddress as any).phone}</p>
+                                                <p className="mt-1 font-medium">{(selectedOrder.shippingAddress as any).district} / {(selectedOrder.shippingAddress as any).city}</p>
+                                                <p className="mt-1 text-gray-500">Tel: {(selectedOrder.shippingAddress as any).phone}</p>
                                             </>
                                         ) : (
-                                            <p>Adres bilgisi bulunamadı.</p>
+                                            <p className="text-red-500">Adres bilgisi bulunamadı.</p>
                                         )}
                                     </div>
                                 </div>
+
+                                {/* Column 3: Cargo & Status */}
                                 <div className="space-y-4">
                                     <div>
-                                        <h4 className="font-semibold mb-2">Kargo Bilgileri</h4>
+                                        <h4 className="font-semibold mb-2 text-sm flex items-center gap-2">
+                                            <span className="bg-purple-100 text-purple-700 p-1 rounded">🚚</span> Kargo Bilgileri
+                                        </h4>
                                         <div className="text-sm text-gray-600 dark:text-gray-300 p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
-                                            <p><span className="font-medium">Firma:</span> {selectedOrder.cargoCompany || "Seçilmedi"}</p>
-                                            <div className="mt-2">
-                                                <Label className="text-xs font-medium mb-1 block">Takip Linki</Label>
-                                                <div className="flex gap-2">
-                                                    <Input
-                                                        defaultValue={selectedOrder.trackingUrl || ""}
-                                                        placeholder="https://kargo-takip..."
-                                                        className="h-8 text-xs"
-                                                        id={`tracking-${selectedOrder.id}`}
-                                                    />
-                                                    <Button
-                                                        size="sm"
-                                                        className="h-8 px-2"
-                                                        onClick={async () => {
-                                                            const input = document.getElementById(`tracking-${selectedOrder.id}`) as HTMLInputElement;
-                                                            if (!input) return;
-
-                                                            const result = await updateOrderTracking(selectedOrder.id, input.value);
-                                                            if (result.success) {
-                                                                toast.success("Takip linki güncellendi");
-                                                                // Update local state to reflect change immediately
-                                                                setSelectedOrder(prev => prev ? ({ ...prev, trackingUrl: input.value }) : null);
-                                                                setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, trackingUrl: input.value } : o));
-                                                            } else {
-                                                                toast.error(result.error);
-                                                            }
-                                                        }}
-                                                    >
-                                                        Kaydet
-                                                    </Button>
-                                                </div>
-                                                {selectedOrder.trackingUrl && (
-                                                    <a href={selectedOrder.trackingUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline mt-1 block">
-                                                        Linki Aç ↗
-                                                    </a>
-                                                )}
+                                            <div className="flex justify-between items-center mb-2">
+                                                <span className="text-xs text-gray-500">Firma</span>
+                                                <span className="font-medium">{selectedOrder.cargoCompany || "Seçilmedi"}</span>
                                             </div>
+
+                                            <Label className="text-xs font-medium mb-1.5 block">Takip Linki</Label>
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    defaultValue={selectedOrder.trackingUrl || ""}
+                                                    placeholder="https://..."
+                                                    className="h-7 text-xs"
+                                                    id={`tracking-${selectedOrder.id}`}
+                                                />
+                                                <Button
+                                                    size="sm"
+                                                    className="h-7 px-2 text-xs"
+                                                    onClick={async () => {
+                                                        const input = document.getElementById(`tracking-${selectedOrder.id}`) as HTMLInputElement;
+                                                        if (!input) return;
+
+                                                        const result = await updateOrderTracking(selectedOrder.id, input.value);
+                                                        if (result.success) {
+                                                            toast.success("Takip linki güncellendi");
+                                                            setSelectedOrder(prev => prev ? ({ ...prev, trackingUrl: input.value }) : null);
+                                                            setOrders(prev => prev.map(o => o.id === selectedOrder.id ? { ...o, trackingUrl: input.value } : o));
+                                                        } else {
+                                                            toast.error(result.error);
+                                                        }
+                                                    }}
+                                                >
+                                                    Kaydet
+                                                </Button>
+                                            </div>
+                                            {selectedOrder.trackingUrl && (
+                                                <a href={selectedOrder.trackingUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline mt-1.5 inline-flex items-center gap-1">
+                                                    Kargo Takip ↗
+                                                </a>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium text-blue-900">Sipariş Durumu</span>
+                                            <Badge className={`${getOrderStatusColor(selectedOrder.status)}`}>
+                                                {getOrderStatusLabel(selectedOrder.status)}
+                                            </Badge>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-
-                            {/* Order Items */}
+                            {/* Order Items Table - Compact */}
                             <div>
-                                <h4 className="font-semibold mb-2">Ürünler</h4>
-                                <div className="border rounded-md overflow-hidden">
+                                <h4 className="font-semibold mb-2 text-sm">Ürünler ({selectedOrder.items.length})</h4>
+                                <div className="border rounded-md overflow-hidden max-h-[300px] overflow-y-auto">
                                     <Table>
-                                        <TableHeader>
+                                        <TableHeader className="bg-gray-50 sticky top-0">
                                             <TableRow>
-                                                <TableHead>Ürün</TableHead>
-                                                <TableHead className="text-center">Adet</TableHead>
-                                                <TableHead className="text-right">Birim Fiyat</TableHead>
-                                                <TableHead className="text-right">Toplam</TableHead>
+                                                <TableHead className="py-2 h-9">Ürün</TableHead>
+                                                <TableHead className="py-2 h-9 text-center w-20">Adet</TableHead>
+                                                <TableHead className="py-2 h-9 text-right w-32">Birim Fiyat</TableHead>
+                                                <TableHead className="py-2 h-9 text-right w-32">Toplam</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {selectedOrder.items.map((item) => (
-                                                <TableRow key={item.id}>
-                                                    <TableCell>{item.productName}</TableCell>
-                                                    <TableCell className="text-center">
+                                                <TableRow key={item.id} className="hover:bg-gray-50">
+                                                    <TableCell className="py-2">{item.productName}</TableCell>
+                                                    <TableCell className="py-2 text-center font-medium">
                                                         {item.quantity}
                                                     </TableCell>
-                                                    <TableCell className="text-right">
+                                                    <TableCell className="py-2 text-right text-gray-600">
                                                         {formatPrice(Number(item.unitPrice))}
                                                     </TableCell>
-                                                    <TableCell className="text-right font-medium">
+                                                    <TableCell className="py-2 text-right font-medium">
                                                         {formatPrice(Number(item.lineTotal))}
                                                     </TableCell>
                                                 </TableRow>
@@ -478,17 +488,18 @@ export function OrdersTable({ orders: initialOrders, pagination }: OrdersTablePr
                             </div>
 
                             {/* Totals */}
-                            <div className="flex justify-end">
-                                <div className="w-64 space-y-2">
-                                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                            <div className="flex justify-end pt-2 border-t">
+                                <div className="w-72 space-y-1.5 bg-gray-50 p-4 rounded-lg">
+                                    <div className="flex justify-between text-sm text-gray-600">
                                         <span>Ara Toplam</span>
                                         <span>{formatPrice(Number(selectedOrder.subtotal))}</span>
                                     </div>
-                                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                                    <div className="flex justify-between text-sm text-gray-600">
                                         <span>KDV Toplam</span>
                                         <span>{formatPrice(Number(selectedOrder.vatAmount))}</span>
                                     </div>
-                                    <div className="flex justify-between text-lg font-bold">
+                                    <div className="border-t border-gray-200 my-1"></div>
+                                    <div className="flex justify-between text-lg font-bold text-gray-900">
                                         <span>Genel Toplam</span>
                                         <span>{formatPrice(Number(selectedOrder.total))}</span>
                                     </div>

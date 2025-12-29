@@ -25,6 +25,7 @@ export async function createProduct(formData: FormData) {
         vatRate: Number(formData.get("vatRate")),
         minQuantity: Number(formData.get("minQuantity")) || 1,
         stock: Number(formData.get("stock")) || 0,
+        criticalStock: Number(formData.get("criticalStock")) || 10,
         categoryId: (formData.get("categoryId") as string) === "none" ? undefined : (formData.get("categoryId") as string) || undefined,
         isFeatured: formData.get("isFeatured") === "true",
         isNew: formData.get("isNew") === "true",
@@ -109,6 +110,7 @@ export async function updateProduct(productId: string, formData: FormData) {
         vatRate: Number(formData.get("vatRate")),
         minQuantity: Number(formData.get("minQuantity")) || 1,
         stock: Number(formData.get("stock")) || 0,
+        criticalStock: Number(formData.get("criticalStock")) || 10,
         categoryId: (formData.get("categoryId") as string) === "none" ? undefined : (formData.get("categoryId") as string) || undefined,
         isFeatured: formData.get("isFeatured") === "true",
         isNew: formData.get("isNew") === "true",
@@ -131,11 +133,16 @@ export async function updateProduct(productId: string, formData: FormData) {
         where: { productId },
     });
 
+    // Extract relation IDs and remove from validatedData for update
+    const { brandId, categoryId, ...updateData } = validatedData;
+
     await prisma.product.update({
         where: { id: productId },
         data: {
-            ...validatedData,
+            ...updateData,
             images,
+            brand: brandId ? { connect: { id: brandId } } : { disconnect: true },
+            category: categoryId ? { connect: { id: categoryId } } : { disconnect: true },
         },
     });
 

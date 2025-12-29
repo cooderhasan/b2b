@@ -36,6 +36,7 @@ export const productSchema = z.object({
     vatRate: z.coerce.number().refine((val) => val === 10 || val === 20, "KDV oranı %10 veya %20 olmalıdır"),
     minQuantity: z.coerce.number().int().positive("Minimum adet pozitif olmalıdır").default(1),
     stock: z.coerce.number().int().min(0, "Stok negatif olamaz").default(0),
+    criticalStock: z.coerce.number().int().min(0, "Kritik stok negatif olamaz").default(10),
     categoryId: z.string().optional(),
     isFeatured: z.boolean().default(false),
     isNew: z.boolean().default(false),

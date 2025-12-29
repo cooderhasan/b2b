@@ -15,6 +15,9 @@ import {
     ChevronLeft,
     Menu,
     Award,
+    AlertTriangle,
+    BarChart3,
+    FileQuestion,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -49,6 +52,21 @@ const menuItems = [
         title: "Siparişler",
         href: "/admin/orders",
         icon: ShoppingCart,
+    },
+    {
+        title: "Teklifler",
+        href: "/admin/quotes",
+        icon: FileQuestion,
+    },
+    {
+        title: "Stok Uyarıları",
+        href: "/admin/stock-alerts",
+        icon: AlertTriangle,
+    },
+    {
+        title: "Raporlar",
+        href: "/admin/reports",
+        icon: BarChart3,
     },
     {
         title: "Slider",

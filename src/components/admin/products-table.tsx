@@ -27,7 +27,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash, Star, Sparkles, TrendingUp, Search } from "lucide-react";
+import { Edit, MoreHorizontal, Trash, Star, Sparkles, TrendingUp, Search, Upload, Download } from "lucide-react";
 import { formatPrice } from "@/lib/helpers";
 import { deleteProduct, toggleProductStatus } from "@/app/admin/(protected)/products/actions";
 import { toast } from "sonner";
@@ -155,6 +155,27 @@ export function ProductsTable({ products: initialProducts, brands, pagination }:
 
     return (
         <div className="space-y-4">
+            {/* Action Buttons */}
+            <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500">
+                    {pagination && `${pagination.totalCount} ürün`}
+                </div>
+                <div className="flex gap-2">
+                    <Link href="/api/products/export">
+                        <Button variant="outline" size="sm">
+                            <Download className="h-4 w-4 mr-2" />
+                            Excel'e Aktar
+                        </Button>
+                    </Link>
+                    <Link href="/admin/products/import">
+                        <Button variant="outline" size="sm">
+                            <Upload className="h-4 w-4 mr-2" />
+                            Toplu Yükle
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+
             {/* Filter Bar */}
             <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow border border-gray-100 dark:border-gray-800">
                 <div className="flex flex-col md:flex-row md:items-end gap-4">

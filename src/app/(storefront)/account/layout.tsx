@@ -7,7 +7,9 @@ import {
     User,
     ShoppingBag,
     MapPin,
-    LogOut
+    LogOut,
+    FileQuestion,
+    CreditCard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
@@ -29,9 +31,19 @@ const sidebarItems = [
         icon: ShoppingBag,
     },
     {
+        title: "Tekliflerim",
+        href: "/account/quotes",
+        icon: FileQuestion,
+    },
+    {
         title: "Adreslerim",
         href: "/account/addresses",
         icon: MapPin,
+    },
+    {
+        title: "Finans / Bakiye",
+        href: "/account/finance",
+        icon: CreditCard,
     },
 ];
 

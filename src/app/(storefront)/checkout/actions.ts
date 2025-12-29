@@ -14,6 +14,7 @@ interface OrderItem {
     variantInfo?: string;
 }
 
+// ... types
 interface CreateOrderData {
     items: OrderItem[];
     shippingAddress: {
@@ -26,12 +27,13 @@ interface CreateOrderData {
     cargoCompany?: string;
     notes?: string;
     discountRate: number;
+    paymentMethod?: "BANK_TRANSFER" | "CURRENT_ACCOUNT";
 }
 
 export async function createOrder(data: CreateOrderData) {
     const session = await auth();
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
         return { success: false, error: "Giriş yapmanız gerekiyor." };
     }
 
@@ -45,6 +47,7 @@ export async function createOrder(data: CreateOrderData) {
         let discountAmount = 0;
         let vatAmount = 0;
 
+        // Verify products and calculate amounts
         const orderItems = await Promise.all(
             data.items.map(async (item) => {
                 const product = await prisma.product.findUnique({
@@ -69,10 +72,7 @@ export async function createOrder(data: CreateOrderData) {
                         throw new Error(`Varyant bulunamadı: ${item.variantId}`);
                     }
 
-                    // For variant, check variant stock instead of product stock
                     stockToCheck = variant.stock;
-
-                    // Adjust price if needed
                     unitPrice += Number(variant.priceAdjustment);
                 }
 
@@ -113,20 +113,53 @@ export async function createOrder(data: CreateOrderData) {
         );
 
         const total = subtotal - discountAmount + vatAmount;
+        const paymentMethod = data.paymentMethod || "BANK_TRANSFER";
+        const orderNumber = generateOrderNumber();
 
         // Create order with transaction
         const order = await prisma.$transaction(async (tx) => {
+            // Check Critical Limit for Current Account
+            if (paymentMethod === "CURRENT_ACCOUNT") {
+                const user = await tx.user.findUnique({
+                    where: { id: session.user.id },
+                    select: {
+                        creditLimit: true,
+                        transactions: {
+                            select: { type: true, amount: true }
+                        }
+                    }
+                });
+
+                if (!user) throw new Error("Kullanıcı bulunamadı.");
+
+                const totalDebit = user.transactions
+                    .filter(t => t.type === "DEBIT")
+                    .reduce((acc, t) => acc + Number(t.amount), 0);
+
+                const totalCredit = user.transactions
+                    .filter(t => t.type === "CREDIT")
+                    .reduce((acc, t) => acc + Number(t.amount), 0);
+
+                const currentDebt = totalDebit - totalCredit;
+                const creditLimit = Number(user.creditLimit);
+                const availableLimit = creditLimit - currentDebt;
+
+                if (total > availableLimit) {
+                    throw new Error(`Yetersiz bakiye. Sipariş tutarı: ${total.toFixed(2)} TL, Kullanılabilir Limit: ${availableLimit.toFixed(2)} TL`);
+                }
+            }
+
             // Create order
             const newOrder = await tx.order.create({
                 data: {
-                    orderNumber: generateOrderNumber(),
+                    orderNumber: orderNumber,
                     userId: session.user.id,
                     subtotal,
                     discountAmount,
                     appliedDiscountRate: data.discountRate,
                     vatAmount,
                     total,
-                    status: "PENDING",
+                    status: paymentMethod === "CURRENT_ACCOUNT" ? "CONFIRMED" : "PENDING",
                     shippingAddress: data.shippingAddress,
                     cargoCompany: data.cargoCompany,
                     notes: data.notes,
@@ -140,11 +173,25 @@ export async function createOrder(data: CreateOrderData) {
             await tx.payment.create({
                 data: {
                     orderId: newOrder.id,
-                    method: "BANK_TRANSFER",
-                    status: "PENDING",
+                    method: paymentMethod,
+                    status: paymentMethod === "CURRENT_ACCOUNT" ? "COMPLETED" : "PENDING",
                     amount: total,
                 },
             });
+
+            // If Current Account, Add Transaction
+            if (paymentMethod === "CURRENT_ACCOUNT") {
+                await tx.currentAccountTransaction.create({
+                    data: {
+                        userId: session.user.id,
+                        type: "DEBIT",
+                        processType: "ORDER",
+                        amount: total,
+                        description: `Sipariş No: ${orderNumber}`,
+                        orderId: newOrder.id,
+                    }
+                });
+            }
 
             // Update stock
             for (const item of data.items) {

@@ -30,6 +30,11 @@ interface CheckoutFormProps {
         city?: string;
         district?: string;
         address?: string;
+        currentAccount?: {
+            creditLimit: number;
+            currentDebt: number;
+            availableLimit: number;
+        };
     };
     cargoCompanies: { id: string; name: string }[];
 }
@@ -39,6 +44,7 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
     const { items, getSummary, discountRate, clearCart } = useCartStore();
     const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState<"BANK_TRANSFER" | "CURRENT_ACCOUNT">("BANK_TRANSFER");
     const orderCompleted = useRef(false);
 
     useEffect(() => {
@@ -61,6 +67,7 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
     }
 
     const summary = getSummary();
+    const canUseCurrentAccount = initialData?.currentAccount && initialData.currentAccount.availableLimit >= summary.total;
 
     if (items.length === 0) {
         return (
@@ -95,6 +102,7 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
                 },
                 cargoCompany: String(formData.get("cargoCompany")),
                 notes: formData.get("notes") ? String(formData.get("notes")) : undefined,
+                paymentMethod: paymentMethod,
                 discountRate: Number(discountRate),
             });
 
@@ -228,17 +236,58 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="flex items-center gap-4 p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/20 border-blue-200 cursor-pointer ring-2 ring-blue-500 ring-offset-2">
-                                    <Building2 className="h-6 w-6 text-blue-600" />
-                                    <div>
-                                        <p className="font-medium text-gray-900 dark:text-white">
-                                            Havale / EFT
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            Sipariş sonunda banka bilgileri verilecektir.
+                                <div
+                                    className={`flex items-start gap-4 p-4 border rounded-lg cursor-pointer transition-all ${paymentMethod === "BANK_TRANSFER" ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 ring-2 ring-blue-500 ring-offset-2" : "hover:bg-gray-50 dark:hover:bg-gray-800"}`}
+                                    onClick={() => setPaymentMethod("BANK_TRANSFER")}
+                                >
+                                    <Building2 className={`h-6 w-6 mt-1 ${paymentMethod === "BANK_TRANSFER" ? "text-blue-600" : "text-gray-500"}`} />
+                                    <div className="flex-1">
+                                        <div className="flex justify-between">
+                                            <p className={`font-medium ${paymentMethod === "BANK_TRANSFER" ? "text-blue-700 dark:text-blue-400" : "text-gray-900 dark:text-white"}`}>
+                                                Havale / EFT
+                                            </p>
+                                        </div>
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            Sipariş sonunda banka bilgileri verilecektir. Ödemeniz onaylandıktan sonra siparişiniz işleme alınır.
                                         </p>
                                     </div>
+                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === "BANK_TRANSFER" ? "border-blue-600 bg-blue-600 text-white" : "border-gray-300"}`}>
+                                        {paymentMethod === "BANK_TRANSFER" && <div className="w-2 h-2 rounded-full bg-white" />}
+                                    </div>
                                 </div>
+
+                                {initialData?.currentAccount && (
+                                    <div
+                                        className={`flex items-start gap-4 p-4 border rounded-lg transition-all ${!canUseCurrentAccount ? "opacity-60 cursor-not-allowed bg-gray-50" :
+                                            paymentMethod === "CURRENT_ACCOUNT" ? "bg-orange-50 dark:bg-orange-900/20 border-orange-200 ring-2 ring-orange-500 ring-offset-2 cursor-pointer" : "hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                                            }`}
+                                        onClick={() => canUseCurrentAccount && setPaymentMethod("CURRENT_ACCOUNT")}
+                                    >
+                                        <CreditCard className={`h-6 w-6 mt-1 ${paymentMethod === "CURRENT_ACCOUNT" ? "text-orange-600" : "text-gray-500"}`} />
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-center">
+                                                <p className={`font-medium ${paymentMethod === "CURRENT_ACCOUNT" ? "text-orange-700 dark:text-orange-400" : "text-gray-900 dark:text-white"}`}>
+                                                    Cari Hesap (Açık Hesap)
+                                                </p>
+                                                <span className={`text-xs px-2 py-1 rounded font-medium ${canUseCurrentAccount ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                                                    {canUseCurrentAccount ? "Limit Uygun" : "Limit Yetersiz"}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                Bakiyenizden düşülerek anında sipariş oluşturulur.
+                                            </p>
+                                            <div className="mt-3 text-sm grid grid-cols-2 gap-2 bg-white dark:bg-gray-900 p-2 rounded border border-gray-100 dark:border-gray-800">
+                                                <div className="text-gray-500">Kullanılabilir Limit:</div>
+                                                <div className="text-right font-medium text-gray-900 dark:text-white">{formatPrice(initialData.currentAccount.availableLimit)}</div>
+                                                <div className="text-gray-500">Kredi Limiti:</div>
+                                                <div className="text-right text-gray-500">{formatPrice(initialData.currentAccount.creditLimit)}</div>
+                                            </div>
+                                        </div>
+                                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentMethod === "CURRENT_ACCOUNT" ? "border-orange-600 bg-orange-600 text-white" : "border-gray-300"}`}>
+                                            {paymentMethod === "CURRENT_ACCOUNT" && <div className="w-2 h-2 rounded-full bg-white" />}
+                                        </div>
+                                    </div>
+                                )}
 
                                 <div className="flex items-center gap-4 p-4 border rounded-lg opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800">
                                     <CreditCard className="h-6 w-6 text-gray-400" />
@@ -250,7 +299,6 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
                             </CardContent>
                         </Card>
 
-                        {/* Notes */}
                         <Card>
                             <CardHeader>
                                 <CardTitle className="text-base">Sipariş Notu</CardTitle>
@@ -265,7 +313,6 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
                         </Card>
                     </div>
 
-                    {/* Right Column: Summary */}
                     <div className="lg:col-span-4">
                         <Card className="sticky top-24 shadow-lg border-t-4 border-t-gray-800 dark:border-t-gray-200">
                             <CardHeader className="pb-4">
@@ -278,7 +325,6 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
                                             key={item.variantId ? `${item.productId}-${item.variantId}` : item.productId}
                                             className="flex gap-4 items-center group relative"
                                         >
-                                            {/* Image & Badge Wrapper */}
                                             <div className="relative shrink-0">
                                                 <div className="h-16 w-16 border bg-white rounded-md overflow-hidden">
                                                     {item.image ? (
@@ -299,7 +345,6 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
                                                 </span>
                                             </div>
 
-                                            {/* Name & Price */}
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2 leading-tight" title={item.name}>
                                                     {item.name}

@@ -12,7 +12,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ShoppingCart, User, Menu, LogOut, Package, Settings, LayoutDashboard, X, Phone } from "lucide-react";
+import { ShoppingCart, User, Menu, LogOut, Package, Settings, LayoutDashboard, X, Phone, Zap } from "lucide-react";
+
+
+
 import { signOut } from "next-auth/react";
 import { useCartStore } from "@/stores/cart-store";
 import type { UserRole, UserStatus } from "@prisma/client";
@@ -313,6 +316,14 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                     <div className="container mx-auto px-4">
                         <nav className="flex items-center gap-1 py-2 overflow-x-auto scrollbar-hide">
                             <Link
+                                href="/quick-order"
+                                className="px-4 py-2 text-sm font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-gray-700 rounded-lg transition-colors whitespace-nowrap flex items-center gap-2"
+                            >
+                                <Zap className="h-4 w-4" />
+                                Hızlı Sipariş
+                            </Link>
+                            <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                            <Link
                                 href="/products"
                                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors whitespace-nowrap"
                             >
@@ -338,6 +349,16 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                     <div className="container mx-auto px-4 py-4 space-y-4">
                         {/* Mobile Search */}
                         <SearchInput />
+
+                        {/* Mobile Quick Order Link */}
+                        <Link
+                            href="/quick-order"
+                            className="flex items-center gap-2 px-3 py-3 bg-orange-50 text-orange-700 rounded-lg font-bold border border-orange-100"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                            <Zap className="h-5 w-5" />
+                            Hızlı Sipariş Formu
+                        </Link>
 
                         {/* Mobile Categories */}
                         <div className="space-y-1">

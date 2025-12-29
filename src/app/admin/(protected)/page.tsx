@@ -8,6 +8,7 @@ import {
     TrendingUp,
     Clock,
     CheckCircle,
+    AlertTriangle,
 } from "lucide-react";
 import { formatPrice, getOrderStatusLabel, getOrderStatusColor } from "@/lib/helpers";
 import Link from "next/link";
@@ -20,6 +21,7 @@ async function getDashboardStats() {
         totalOrders,
         pendingOrders,
         recentOrders,
+        lowStockProducts,
     ] = await Promise.all([
         prisma.product.count({ where: { isActive: true } }),
         prisma.user.count({ where: { role: "DEALER", status: "APPROVED" } }),
@@ -33,6 +35,11 @@ async function getDashboardStats() {
                 user: { select: { companyName: true, email: true } },
             },
         }),
+        // Düşük stoklu ürünleri bul
+        prisma.$queryRaw<{ count: bigint }[]>`
+            SELECT COUNT(*) as count FROM products 
+            WHERE "isActive" = true AND stock <= "criticalStock"
+        `,
     ]);
 
     // Revenue calculation
@@ -51,6 +58,7 @@ async function getDashboardStats() {
         pendingDealers,
         totalOrders,
         pendingOrders,
+        lowStockCount: Number(lowStockProducts[0]?.count || 0),
         totalRevenue: Number(totalRevenue),
         recentOrders: recentOrders.map((order) => ({
             ...order,
@@ -158,6 +166,31 @@ export default async function AdminDashboardPage() {
                         <Link
                             href="/admin/customers?status=PENDING"
                             className="text-sm font-medium text-amber-700 hover:text-amber-800 dark:text-amber-300"
+                        >
+                            Görüntüle →
+                        </Link>
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Low Stock Alert */}
+            {stats.lowStockCount > 0 && (
+                <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
+                    <CardContent className="flex items-center justify-between py-4">
+                        <div className="flex items-center gap-3">
+                            <AlertTriangle className="h-5 w-5 text-red-600" />
+                            <div>
+                                <p className="font-medium text-red-800 dark:text-red-200">
+                                    {stats.lowStockCount} üründe stok kritik seviyede!
+                                </p>
+                                <p className="text-sm text-red-600 dark:text-red-400">
+                                    Stok yönetimi için hemen kontrol edin.
+                                </p>
+                            </div>
+                        </div>
+                        <Link
+                            href="/admin/stock-alerts"
+                            className="text-sm font-medium text-red-700 hover:text-red-800 dark:text-red-300"
                         >
                             Görüntüle →
                         </Link>
