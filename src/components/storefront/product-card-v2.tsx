@@ -190,13 +190,13 @@ export function ProductCardV2({
                     )}
 
                     {/* Action Section (Quantity & Button) */}
-                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                         {product.stock > 0 && !hasVariants ? (
                             <>
-                                <div className="flex items-center border border-gray-200 dark:border-gray-600 rounded-md h-10 w-24 shrink-0">
+                                <div className="flex items-center justify-center border border-gray-200 dark:border-gray-600 rounded-md h-10 w-full sm:w-24 shrink-0">
                                     <button
                                         onClick={(e) => handleQuantityChange(e, -1)}
-                                        className="w-8 h-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
+                                        className="w-10 sm:w-8 h-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
                                     >
                                         <Minus className="w-3 h-3" />
                                     </button>
@@ -205,15 +205,16 @@ export function ProductCardV2({
                                     </div>
                                     <button
                                         onClick={(e) => handleQuantityChange(e, 1)}
-                                        className="w-8 h-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
+                                        className="w-10 sm:w-8 h-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 transition-colors"
                                     >
                                         <Plus className="w-3 h-3" />
                                     </button>
                                 </div>
                                 <Button
                                     onClick={handleAddToCart}
-                                    className="flex-1 h-10 bg-[#E31E24] hover:bg-[#c4151a] text-white font-medium text-sm"
+                                    className="w-full sm:flex-1 h-10 bg-[#E31E24] hover:bg-[#c4151a] text-white font-medium text-sm"
                                 >
+                                    <ShoppingCart className="w-4 h-4 mr-2 sm:hidden" />
                                     Sepete Ekle
                                 </Button>
                             </>

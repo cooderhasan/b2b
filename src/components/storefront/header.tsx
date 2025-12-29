@@ -432,7 +432,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                             {categories.map((category) => (
                                 <Link
                                     key={category.id}
-                                    href={`/products/${category.slug}`}
+                                    href={`/products?category=${category.slug}`}
                                     className="block px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
