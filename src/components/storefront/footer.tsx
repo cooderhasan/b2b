@@ -162,8 +162,19 @@ export function StorefrontFooter({ settings }: StorefrontFooterProps) {
                     </div>
                 </div>
 
-                <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+                <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm space-y-1">
                     <p>© {new Date().getFullYear()} {settings?.companyName || "B2B Toptancı"}. Tüm hakları saklıdır.</p>
+                    <p className="text-gray-500">
+                        Coded by{" "}
+                        <a
+                            href="https://www.hasandurmus.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-orange-500 hover:text-orange-400 transition-colors"
+                        >
+                            Hasan Durmuş
+                        </a>
+                    </p>
                 </div>
             </div>
         </footer>

@@ -140,9 +140,20 @@ export default function AdminLoginPage() {
                 </div>
 
                 {/* Footer */}
-                <div className="mt-8 text-center">
+                <div className="mt-8 text-center space-y-1">
                     <p className="text-gray-500 text-sm">
                         B2B Yönetim Sistemi © {new Date().getFullYear()}
+                    </p>
+                    <p className="text-gray-600 text-xs">
+                        Coded by{" "}
+                        <a
+                            href="https://www.hasandurmus.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300 transition-colors"
+                        >
+                            Hasan Durmuş
+                        </a>
                     </p>
                 </div>
             </div>
