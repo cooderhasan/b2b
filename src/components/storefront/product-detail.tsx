@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ProductCard } from "./product-card";
+import { ProductCardV2 } from "./product-card-v2";
 import { formatPrice, calculatePrice, validateMinQuantity } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart-store";
@@ -38,6 +38,10 @@ interface Product {
     description: string | null;
     category: {
         id: string;
+        name: string;
+        slug: string;
+    } | null;
+    brand?: {
         name: string;
         slug: string;
     } | null;
@@ -540,7 +544,7 @@ export function ProductDetail({
                     </h2>
                     <div className="grid gap-6 grid-cols-2 md:grid-cols-4">
                         {relatedProducts.map((p) => (
-                            <ProductCard
+                            <ProductCardV2
                                 key={p.id}
                                 product={p}
                                 discountRate={discountRate}

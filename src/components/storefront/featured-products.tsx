@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ProductCard } from "./product-card";
+import { ProductCardV2 } from "./product-card-v2";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
 interface Product {
@@ -12,6 +12,10 @@ interface Product {
     minQuantity: number;
     stock: number;
     category: {
+        name: string;
+        slug: string;
+    } | null;
+    brand?: {
         name: string;
         slug: string;
     } | null;
@@ -54,7 +58,7 @@ export function FeaturedProducts({
             {/* Products Grid */}
             <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {products.map((product) => (
-                    <ProductCard
+                    <ProductCardV2
                         key={product.id}
                         product={{
                             ...product,

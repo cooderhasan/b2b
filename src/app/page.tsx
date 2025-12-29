@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Truck, Shield, HeadphonesIcon } from "lucide-react";
 
 async function getHomeData() {
-  const [sliders, featuredProducts, newProducts, bestSellers, categories] =
+  const [sliders, featuredProducts, newProducts, bestSellers, categories, headerCategories] =
     await Promise.all([
       prisma.slider.findMany({
         where: { isActive: true },
@@ -19,22 +19,39 @@ async function getHomeData() {
       }),
       prisma.product.findMany({
         where: { isActive: true, isFeatured: true },
-        include: { category: true },
+        include: { category: true, brand: true },
         take: 8,
       }),
       prisma.product.findMany({
         where: { isActive: true, isNew: true },
-        include: { category: true },
+        include: { category: true, brand: true },
         take: 8,
       }),
       prisma.product.findMany({
         where: { isActive: true, isBestSeller: true },
-        include: { category: true },
+        include: { category: true, brand: true },
         take: 8,
       }),
       prisma.category.findMany({
-        where: { isActive: true },
+        where: { isActive: true, isFeatured: true },
         orderBy: { order: "asc" },
+        take: 4, // Limit to 4 as requested for category section
+      }),
+      // Header categories with children for dropdown menus
+      prisma.category.findMany({
+        where: { isActive: true, parentId: null },
+        orderBy: { order: "asc" },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          parentId: true,
+          children: {
+            where: { isActive: true },
+            select: { id: true, name: true, slug: true },
+            orderBy: { order: "asc" }
+          }
+        }
       }),
     ]);
 
@@ -62,6 +79,7 @@ async function getHomeData() {
     newProducts: newProducts.map(transformProduct),
     bestSellers: bestSellers.map(transformProduct),
     categories: categories.map(transformCategory),
+    headerCategories: headerCategories,
   };
 }
 
@@ -79,7 +97,7 @@ export default async function HomePage() {
         user={session?.user}
         logoUrl={settings.logoUrl}
         siteName={settings.siteName}
-        categories={data.categories}
+        categories={data.headerCategories}
         phone={settings.phone}
         facebookUrl={settings.facebookUrl}
         instagramUrl={settings.instagramUrl}
@@ -155,9 +173,9 @@ export default async function HomePage() {
                     </Link>
                     <Link href="/login">
                       <Button
-                        variant="outline"
+                        variant="secondary"
                         size="lg"
-                        className="border-white text-white hover:bg-white/10"
+                        className="bg-white/20 backdrop-blur-sm text-white border-2 border-white hover:bg-white hover:text-blue-600"
                       >
                         Giriş Yap
                       </Button>

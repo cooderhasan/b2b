@@ -12,10 +12,23 @@ export function StorefrontFooter({ settings }: StorefrontFooterProps) {
                     {/* Company Info */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                                <span className="text-white font-bold">B2B</span>
-                            </div>
-                            <span className="font-bold text-xl text-white">{settings?.siteName || "Toptancı"}</span>
+                            {settings?.logoUrl ? (
+                                <img src={settings.logoUrl} alt={settings?.siteName || "Logo"} className="h-10 w-auto object-contain" />
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center transform -rotate-3 shadow-lg">
+                                        <span className="text-white font-extrabold text-xl">B</span>
+                                    </div>
+                                    <div className="flex flex-col leading-none">
+                                        <span className="font-black text-2xl text-white tracking-tight uppercase">
+                                            BAGAJ
+                                        </span>
+                                        <span className="font-bold text-sm text-orange-600 tracking-widest uppercase">
+                                            LASTİĞİ
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <p className="text-sm">
                             {settings?.seoDescription || "Bayilerimize özel fiyatlarla toptan satış platformu."}

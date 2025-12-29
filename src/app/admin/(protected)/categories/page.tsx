@@ -8,6 +8,9 @@ export default async function CategoriesPage() {
             _count: {
                 select: { products: true },
             },
+            parent: {
+                select: { name: true },
+            },
         },
     });
 

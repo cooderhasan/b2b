@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { ProductCard } from "@/components/storefront/product-card";
+import { ProductCardV2 } from "@/components/storefront/product-card-v2";
 import { ProductFilters } from "@/components/storefront/product-filters";
 import { Prisma } from "@prisma/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,7 +32,19 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
     // Category
     if (params.category) {
-        where.category = { slug: params.category };
+        const category = await prisma.category.findUnique({
+            where: { slug: params.category },
+            include: { children: { select: { id: true } } }
+        });
+
+        if (category) {
+            const categoryIds = [category.id, ...category.children.map(c => c.id)];
+            where.categoryId = { in: categoryIds };
+        } else {
+            // If category slug is invalid but provided, verified later by products length being 0 usually, 
+            // but strictly we might want to return 404. For now, let it return empty.
+            where.category = { slug: params.category };
+        }
     }
 
     // Search
@@ -129,6 +141,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             where,
             include: {
                 category: true,
+                brand: true,
                 _count: { select: { variants: true } }
             },
             orderBy,
@@ -202,7 +215,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                     ) : (
                         <div className="grid gap-6 grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                             {products.map((product) => (
-                                <ProductCard
+                                <ProductCardV2
                                     key={product.id}
                                     product={{
                                         ...product,

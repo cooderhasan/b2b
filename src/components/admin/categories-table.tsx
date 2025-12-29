@@ -22,8 +22,15 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { X, Plus, Pencil, Trash2 } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { createCategory, updateCategory, deleteCategory, toggleCategoryStatus } from "@/app/admin/(protected)/categories/actions";
 
@@ -34,6 +41,12 @@ interface Category {
     order: number;
     isActive: boolean;
     createdAt: Date;
+    parentId?: string | null;
+    imageUrl?: string | null;
+    isFeatured: boolean;
+    parent?: {
+        name: string;
+    } | null;
     _count: {
         products: number;
     };
@@ -63,6 +76,36 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
     const [order, setOrder] = useState(0);
+    const [parentId, setParentId] = useState<string | null>(null);
+    const [imageUrl, setImageUrl] = useState("");
+    const [isFeatured, setIsFeatured] = useState(false);
+    const [uploading, setUploading] = useState(false);
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+
+        setUploading(true);
+        const file = e.target.files[0];
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) throw new Error("Upload failed");
+
+            const data = await res.json();
+            setImageUrl(data.url);
+            toast.success("Resim yüklendi");
+        } catch {
+            toast.error("Resim yüklenirken hata oluştu");
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -70,10 +113,10 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
 
         try {
             if (editCategory) {
-                await updateCategory(editCategory.id, { name, slug, order });
+                await updateCategory(editCategory.id, { name, slug, order, parentId, imageUrl, isFeatured });
                 toast.success("Kategori güncellendi.");
             } else {
-                await createCategory({ name, slug, order });
+                await createCategory({ name, slug, order, parentId, imageUrl, isFeatured });
                 toast.success("Kategori oluşturuldu.");
             }
             setIsOpen(false);
@@ -109,6 +152,9 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         setName("");
         setSlug("");
         setOrder(0);
+        setParentId(null);
+        setImageUrl("");
+        setIsFeatured(false);
         setEditCategory(null);
     };
 
@@ -117,6 +163,9 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         setName(category.name);
         setSlug(category.slug);
         setOrder(category.order);
+        setParentId(category.parentId || null);
+        setImageUrl(category.imageUrl || "");
+        setIsFeatured(category.isFeatured);
         setIsOpen(true);
     };
 
@@ -180,6 +229,58 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                                         onChange={(e) => setOrder(parseInt(e.target.value) || 0)}
                                     />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label>Üst Kategori</Label>
+                                    <Select
+                                        value={parentId || "root"}
+                                        onValueChange={(value) => setParentId(value === "root" ? null : value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Üst Kategori Seçin" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="root">Ana Kategori</SelectItem>
+                                            {categories
+                                                .filter(c => c.id !== editCategory?.id) // Prevent self-parenting
+                                                .map((c) => (
+                                                    <SelectItem key={c.id} value={c.id}>
+                                                        {c.name}
+                                                    </SelectItem>
+                                                ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Kategori Görseli</Label>
+                                    <div className="flex items-center gap-4">
+                                        {imageUrl && (
+                                            <div className="relative w-16 h-16 border rounded-md overflow-hidden">
+                                                <img src={imageUrl} alt="Kategori" className="object-cover w-full h-full" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setImageUrl("")}
+                                                    className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        )}
+                                        <Input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            disabled={uploading}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id="featured"
+                                        checked={isFeatured}
+                                        onCheckedChange={setIsFeatured}
+                                    />
+                                    <Label htmlFor="featured">Ana Sayfada Göster</Label>
+                                </div>
                             </div>
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
@@ -217,7 +318,16 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                             categories.map((category) => (
                                 <TableRow key={category.id}>
                                     <TableCell>{category.order}</TableCell>
-                                    <TableCell className="font-medium">{category.name}</TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{category.name}</span>
+                                            {category.parent && (
+                                                <span className="text-xs text-gray-400">
+                                                    ↳ {category.parent.name}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </TableCell>
                                     <TableCell className="text-gray-500">{category.slug}</TableCell>
                                     <TableCell>
                                         <Badge variant="secondary">

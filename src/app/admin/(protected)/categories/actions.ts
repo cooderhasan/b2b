@@ -14,18 +14,21 @@ export async function getCategories() {
     });
 }
 
-export async function createCategory(data: { name: string; slug: string; order?: number }) {
+export async function createCategory(data: { name: string; slug: string; order?: number; parentId?: string | null; imageUrl?: string; isFeatured?: boolean }) {
     await prisma.category.create({
         data: {
             name: data.name,
             slug: data.slug,
             order: data.order ?? 0,
+            parentId: data.parentId || null,
+            imageUrl: data.imageUrl,
+            isFeatured: data.isFeatured ?? false,
         },
     });
     revalidatePath("/admin/categories");
 }
 
-export async function updateCategory(id: string, data: { name?: string; slug?: string; order?: number; isActive?: boolean }) {
+export async function updateCategory(id: string, data: { name?: string; slug?: string; order?: number; isActive?: boolean; parentId?: string | null; imageUrl?: string; isFeatured?: boolean }) {
     await prisma.category.update({
         where: { id },
         data,

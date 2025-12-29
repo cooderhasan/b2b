@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ShoppingCart, User, Menu, LogOut, Package, Settings, LayoutDashboard, X, Phone, Zap } from "lucide-react";
+import { ShoppingCart, User, Menu, LogOut, Package, Settings, LayoutDashboard, X, Phone, Zap, ChevronDown, Home } from "lucide-react";
 
 
 
@@ -25,6 +25,8 @@ interface Category {
     id: string;
     name: string;
     slug: string;
+    parentId?: string | null;
+    children?: Category[];
 }
 
 interface StorefrontHeaderProps {
@@ -48,6 +50,7 @@ interface StorefrontHeaderProps {
 
 export function StorefrontHeader({ user, logoUrl, siteName, categories = [], phone, facebookUrl, instagramUrl, twitterUrl, linkedinUrl }: StorefrontHeaderProps) {
     const items = useCartStore((state) => state.items);
+    const clearCart = useCartStore((state) => state.clearCart);
     const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -75,6 +78,17 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
     const isAdmin = user?.role === "ADMIN" || user?.role === "OPERATOR";
     const isDealer = user?.role === "DEALER" && user?.status === "APPROVED";
 
+    const categoryTree = useMemo(() => {
+        // Filter to only root categories (no parentId)
+        // Children are already included from the database query
+        return categories
+            .filter(c => !c.parentId)
+            .map(c => ({
+                ...c,
+                children: (c as any).children || []
+            }));
+    }, [categories]);
+
     return (
         <header className="sticky top-0 z-50 w-full bg-white dark:bg-gray-900 shadow-sm">
             {/* Top Row: Logo, Search, User Actions */}
@@ -87,12 +101,17 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                 <img src={logoUrl} alt={siteName || "Logo"} className="h-10 w-auto object-contain" />
                             ) : (
                                 <div className="flex items-center gap-2">
-                                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                                        <span className="text-white font-bold">B2B</span>
+                                    <div className="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center transform -rotate-3 shadow-lg">
+                                        <span className="text-white font-extrabold text-xl">B</span>
                                     </div>
-                                    <span className="font-bold text-xl text-gray-900 dark:text-white hidden sm:inline">
-                                        {siteName || "Toptancı"}
-                                    </span>
+                                    <div className="flex flex-col leading-none">
+                                        <span className="font-black text-2xl text-gray-900 dark:text-white tracking-tight uppercase">
+                                            BAGAJ
+                                        </span>
+                                        <span className="font-bold text-sm text-orange-600 tracking-widest uppercase">
+                                            LASTİĞİ
+                                        </span>
+                                    </div>
                                 </div>
                             )}
                         </Link>
@@ -267,7 +286,10 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                                 )}
                                                 <DropdownMenuItem
                                                     className="text-red-600"
-                                                    onClick={() => signOut({ callbackUrl: "/" })}
+                                                    onClick={() => {
+                                                        clearCart();
+                                                        signOut({ callbackUrl: "/" });
+                                                    }}
                                                 >
                                                     <LogOut className="mr-2 h-4 w-4" />
                                                     Çıkış Yap
@@ -278,23 +300,25 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                 )}
                             </div>
 
-                            {/* Cart */}
-                            <Link href="/cart" className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 border-l pl-4">
-                                <div className="relative">
-                                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                        <ShoppingCart className="h-5 w-5 text-orange-600" />
+                            {/* Cart - Only visible for logged in users */}
+                            {user && (
+                                <Link href="/cart" className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 border-l pl-4">
+                                    <div className="relative">
+                                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                            <ShoppingCart className="h-5 w-5 text-orange-600" />
+                                        </div>
+                                        <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white border-2 border-white">
+                                            {mounted ? itemCount : 0}
+                                        </span>
                                     </div>
-                                    <span className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white border-2 border-white">
-                                        {mounted ? itemCount : 0}
-                                    </span>
-                                </div>
-                                <div className="hidden sm:flex flex-col items-start">
-                                    <span className="text-[10px] text-gray-500">Sepetim</span>
-                                    <span className="text-sm font-bold text-orange-600">
-                                        <CartTotalDisplay />
-                                    </span>
-                                </div>
-                            </Link>
+                                    <div className="hidden sm:flex flex-col items-start">
+                                        <span className="text-[10px] text-gray-500">Sepetim</span>
+                                        <span className="text-sm font-bold text-orange-600">
+                                            <CartTotalDisplay />
+                                        </span>
+                                    </div>
+                                </Link>
+                            )}
 
                             {/* Mobile Menu Toggle */}
                             <Button
@@ -314,7 +338,14 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
             {categories.length > 0 && (
                 <div className="hidden md:block bg-gray-50 dark:bg-gray-800/50 border-b dark:border-gray-800">
                     <div className="container mx-auto px-4">
-                        <nav className="flex items-center gap-1 py-2 overflow-x-auto scrollbar-hide">
+                        <nav className="flex items-center justify-center gap-2 py-3">
+                            <Link
+                                href="/"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors whitespace-nowrap flex items-center gap-2"
+                            >
+                                <Home className="h-4 w-4" />
+                                Anasayfa
+                            </Link>
                             <Link
                                 href="/quick-order"
                                 className="px-4 py-2 text-sm font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-gray-700 rounded-lg transition-colors whitespace-nowrap flex items-center gap-2"
@@ -322,22 +353,50 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
                                 <Zap className="h-4 w-4" />
                                 Hızlı Sipariş
                             </Link>
-                            <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1"></div>
-                            <Link
-                                href="/products"
-                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors whitespace-nowrap"
-                            >
-                                Tüm Ürünler
-                            </Link>
-                            {categories.map((category) => (
-                                <Link
-                                    key={category.id}
-                                    href={`/products/${category.slug}`}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors whitespace-nowrap"
-                                >
-                                    {category.name}
-                                </Link>
-                            ))}
+                            <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-2"></div>
+                            {categoryTree
+                                .filter(c => {
+                                    // Normalize name for comparison (lowercase, remove spaces if needed, but simple includes is safer)
+                                    const n = c.name.toLowerCase();
+                                    return n.includes("bagaj lastiği") ||
+                                        n.includes("kask filesi") ||
+                                        n.includes("motosiklet aksesuarları") ||
+                                        n.includes("motosiklet yedek parça");
+                                })
+                                .map((category) => (
+                                    category.children && category.children.length > 0 ? (
+                                        <div key={category.id} className="relative group">
+                                            <Link
+                                                href={`/products?category=${category.slug}`}
+                                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors whitespace-nowrap flex items-center gap-1"
+                                            >
+                                                {category.name}
+                                                <ChevronDown className="h-3 w-3 opacity-50" />
+                                            </Link>
+                                            <div className="absolute top-full left-0 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 min-w-[200px]">
+                                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 p-2 flex flex-col gap-1">
+                                                    {category.children.map((child) => (
+                                                        <Link
+                                                            key={child.id}
+                                                            href={`/products?category=${child.slug}`}
+                                                            className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
+                                                        >
+                                                            {child.name}
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <Link
+                                            key={category.id}
+                                            href={`/products?category=${category.slug}`}
+                                            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors whitespace-nowrap"
+                                        >
+                                            {category.name}
+                                        </Link>
+                                    )
+                                ))}
                         </nav>
                     </div>
                 </div>

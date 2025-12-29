@@ -23,6 +23,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         where: { slug, isActive: true },
         include: {
             category: true,
+            brand: true,
             variants: {
                 where: { isActive: true },
             },
@@ -44,7 +45,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             categoryId: product.categoryId,
             id: { not: product.id },
         },
-        include: { category: true },
+        include: { category: true, brand: true },
         take: 4,
     });
 

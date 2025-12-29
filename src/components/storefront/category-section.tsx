@@ -5,6 +5,7 @@ interface Category {
     id: string;
     name: string;
     slug: string;
+    imageUrl?: string | null;
 }
 
 interface CategorySectionProps {
@@ -17,21 +18,40 @@ export function CategorySection({ categories }: CategorySectionProps) {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
                 Kategoriler
             </h2>
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {categories.map((category) => (
                     <Link
                         key={category.id}
                         href={`/products?category=${category.slug}`}
-                        className="group relative p-6 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-700 rounded-xl overflow-hidden hover:shadow-lg transition-all"
+                        className="group relative h-64 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
                     >
-                        <div className="relative z-10">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition-colors">
+                        {/* Background Image */}
+                        <div className="absolute inset-0 bg-white dark:bg-gray-800">
+                            {category.imageUrl ? (
+                                <img
+                                    src={category.imageUrl}
+                                    alt={category.name}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400">
+                                    <span className="text-4xl">📷</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Overlay - only at bottom for text readability */}
+                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
+
+                        {/* Content */}
+                        <div className="absolute bottom-0 left-0 p-6 w-full">
+                            <h3 className="text-xl font-bold text-white mb-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
                                 {category.name}
                             </h3>
-                            <span className="flex items-center text-sm text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                                Keşfet
-                                <ArrowRight className="h-4 w-4 ml-1" />
-                            </span>
+                            <div className="flex items-center text-sm text-blue-300 font-medium translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                                Şimdi İncele
+                                <ArrowRight className="h-4 w-4 ml-2" />
+                            </div>
                         </div>
                     </Link>
                 ))}
