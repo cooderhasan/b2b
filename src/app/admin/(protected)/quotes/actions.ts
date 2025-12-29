@@ -98,7 +98,11 @@ export async function convertQuoteToOrder(quoteId: string) {
     const quote = await prisma.quote.findUnique({
         where: { id: quoteId },
         include: {
-            items: true,
+            items: {
+                include: {
+                    product: { select: { vatRate: true } }
+                }
+            },
             user: true
         }
     });
@@ -126,13 +130,21 @@ export async function convertQuoteToOrder(quoteId: string) {
             vatAmount: 0, // Hesaplanabilir
             total: quote.total || 0,
             items: {
-                create: quote.items.map(item => ({
-                    productId: item.productId,
-                    productName: item.productName,
-                    quantity: item.quantity,
-                    unitPrice: item.quotedPrice || item.listPrice,
-                    lineTotal: item.lineTotal || 0
-                }))
+                create: quote.items.map(item => {
+                    const listPrice = Number(item.listPrice);
+                    const unitPrice = Number(item.quotedPrice || item.listPrice);
+                    const discountRate = listPrice > 0 ? ((listPrice - unitPrice) / listPrice) * 100 : 0;
+
+                    return {
+                        productId: item.productId,
+                        productName: item.productName,
+                        quantity: item.quantity,
+                        unitPrice: item.quotedPrice || item.listPrice,
+                        lineTotal: item.lineTotal || 0,
+                        vatRate: item.product.vatRate,
+                        discountRate: discountRate
+                    };
+                })
             }
         }
     });

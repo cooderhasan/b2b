@@ -8,7 +8,7 @@ import { ArrowRight, Truck, Shield, HeadphonesIcon } from "lucide-react";
 import { auth } from "@/lib/auth";
 
 async function getHomeData() {
-    const [sliders, featuredProducts, newProducts, bestSellers, categories] =
+    const [sliders, featuredProductsRaw, newProductsRaw, bestSellersRaw, categories] =
         await Promise.all([
             prisma.slider.findMany({
                 where: { isActive: true },
@@ -35,7 +35,18 @@ async function getHomeData() {
             }),
         ]);
 
-    return { sliders, featuredProducts, newProducts, bestSellers, categories };
+    const transformProduct = (product: any) => ({
+        ...product,
+        listPrice: Number(product.listPrice),
+    });
+
+    return {
+        sliders,
+        featuredProducts: featuredProductsRaw.map(transformProduct),
+        newProducts: newProductsRaw.map(transformProduct),
+        bestSellers: bestSellersRaw.map(transformProduct),
+        categories,
+    };
 }
 
 export default async function HomePage() {

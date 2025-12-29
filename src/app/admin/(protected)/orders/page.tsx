@@ -55,7 +55,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
             where,
             include: {
                 user: {
-                    select: { companyName: true, email: true, phone: true },
+                    select: { id: true, companyName: true, email: true, phone: true },
                 },
                 items: true,
                 payment: true,

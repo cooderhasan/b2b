@@ -168,7 +168,7 @@ export async function updateProduct(productId: string, formData: FormData) {
             action: "UPDATE_PRODUCT",
             entityType: "Product",
             entityId: productId,
-            oldData: oldProduct,
+            oldData: oldProduct ? JSON.parse(JSON.stringify(oldProduct)) : null,
             newData: validatedData,
         },
     });
@@ -197,7 +197,7 @@ export async function deleteProduct(productId: string) {
             action: "DELETE_PRODUCT",
             entityType: "Product",
             entityId: productId,
-            oldData: product,
+            oldData: product ? JSON.parse(JSON.stringify(product)) : null,
         },
     });
 

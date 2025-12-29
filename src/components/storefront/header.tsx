@@ -85,7 +85,7 @@ export function StorefrontHeader({ user, logoUrl, siteName, categories = [], pho
             .filter(c => !c.parentId)
             .map(c => ({
                 ...c,
-                children: (c as any).children || []
+                children: (c.children || []) as Category[]
             }));
     }, [categories]);
 

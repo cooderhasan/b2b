@@ -36,6 +36,10 @@ export default async function EditProductPage({ params }: EditProductPageProps) 
         listPrice: product.listPrice.toNumber(),
         variants: product.variants.map((v) => ({
             ...v,
+            color: v.color || "",
+            size: v.size || "",
+            sku: v.sku || "",
+            barcode: v.barcode || "",
             priceAdjustment: v.priceAdjustment.toNumber(),
         })),
     };

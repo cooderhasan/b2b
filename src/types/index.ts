@@ -1,5 +1,6 @@
-import { UserRole, UserStatus } from "@prisma/client";
-import { Decimal } from "@prisma/client/runtime/library";
+import { UserRole, UserStatus, Prisma } from "@prisma/client";
+
+export type Decimal = Prisma.Decimal;
 
 // ==================== USER TYPES ====================
 
@@ -94,11 +95,11 @@ export interface CartSummary {
 export interface OrderWithItems {
     id: string;
     orderNumber: string;
-    subtotal: Decimal;
-    discountAmount: Decimal;
-    appliedDiscountRate: Decimal;
-    vatAmount: Decimal;
-    total: Decimal;
+    subtotal: number;
+    discountAmount: number;
+    appliedDiscountRate: number;
+    vatAmount: number;
+    total: number;
     status: string;
     shippingAddress: unknown;
     cargoCompany: string | null;
@@ -115,16 +116,16 @@ export interface OrderWithItems {
         id: string;
         productName: string;
         quantity: number;
-        unitPrice: Decimal;
-        discountRate: Decimal;
+        unitPrice: number;
+        discountRate: number;
         vatRate: number;
-        lineTotal: Decimal;
+        lineTotal: number;
     }[];
     payment: {
         id: string;
         method: string;
         status: string;
-        amount: Decimal;
+        amount: number;
     } | null;
 }
 
