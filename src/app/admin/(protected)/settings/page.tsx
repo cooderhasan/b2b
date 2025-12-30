@@ -11,7 +11,7 @@ export default async function SettingsPage() {
         orderBy: { name: "asc" },
     });
 
-    const settings = (generalSettings?.value as Record<string, string>) || {
+    const defaults = {
         siteName: "",
         companyName: "",
         phone: "",
@@ -45,6 +45,8 @@ export default async function SettingsPage() {
         bankIban1: "",
         bankIban2: "",
     };
+
+    const settings = { ...defaults, ...((generalSettings?.value as Record<string, string>) || {}) };
 
     return (
         <div className="space-y-6">

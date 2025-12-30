@@ -22,13 +22,8 @@ export async function generateMetadata(): Promise<Metadata> {
     where: { key: "general" },
   });
 
-  const brandingSettings = await prisma.siteSettings.findUnique({
-    where: { key: "branding" },
-  });
-
   // Cast the JSON value to a typed object or any for simpler access
   const general = (generalSettings?.value as any) || {};
-  const branding = (brandingSettings?.value as any) || {};
 
   return {
     title: {
@@ -38,9 +33,9 @@ export async function generateMetadata(): Promise<Metadata> {
     description: general.seoDescription || "B2B Toptan Satış Platformu",
     keywords: general.seoKeywords?.split(",") || [],
     icons: {
-      icon: branding.faviconUrl || "/favicon.ico",
-      shortcut: branding.faviconUrl || "/favicon.ico",
-      apple: branding.faviconUrl || "/favicon.ico", // Or a specific apple touch icon if available
+      icon: general.faviconUrl || "/favicon.ico",
+      shortcut: general.faviconUrl || "/favicon.ico",
+      apple: general.faviconUrl || "/favicon.ico", // Or a specific apple touch icon if available
     },
     openGraph: {
       title: general.seoTitle || general.siteName || "B2B E-Ticaret Platformu",
