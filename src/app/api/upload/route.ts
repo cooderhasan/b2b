@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getToken } from "next-auth/jwt";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
@@ -8,8 +8,14 @@ export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
     try {
-        const session = await auth();
-        if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
+        // Use getToken for robust auth check consistent with middleware
+        const token = await getToken({
+            req: request,
+            secret: process.env.AUTH_SECRET,
+            secureCookie: process.env.NODE_ENV === "production",
+        });
+
+        if (!token || (token.role !== "ADMIN" && token.role !== "OPERATOR")) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
