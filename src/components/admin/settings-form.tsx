@@ -153,6 +153,19 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                                         rows={3}
                                     />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="googleMapsEmbedUrl">Google Maps Embed URL</Label>
+                                    <Textarea
+                                        id="googleMapsEmbedUrl"
+                                        value={settings.googleMapsEmbedUrl || ""}
+                                        onChange={(e) => updateField("googleMapsEmbedUrl", e.target.value)}
+                                        placeholder="https://www.google.com/maps/embed?..."
+                                        rows={3}
+                                    />
+                                    <p className="text-xs text-gray-500">
+                                        Google Maps'te "Paylaş &gt; Harita yerleştir" seçeneğindeki "src" özelliğinin içindeki URL'yi buraya yapıştırın.
+                                    </p>
+                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
