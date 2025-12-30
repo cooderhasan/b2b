@@ -248,8 +248,8 @@ export async function createOrder(data: CreateOrderData) {
                 paymentMethod: paymentMethod,
                 bankInfo: paymentMethod === "BANK_TRANSFER" ? {
                     bankName: settings.bankName || "",
-                    iban: settings.bankIban || "",
-                    accountHolder: settings.bankAccountHolder || "",
+                    iban: settings.bankIban1 || "",
+                    accountHolder: settings.bankAccountName || "",
                 } : undefined,
                 shippingAddress: {
                     address: data.shippingAddress.address,

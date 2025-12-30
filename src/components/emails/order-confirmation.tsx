@@ -36,6 +36,12 @@ interface OrderConfirmationEmailProps {
         city: string;
         district?: string;
     };
+    paymentMethod?: "BANK_TRANSFER" | "CREDIT_CARD" | "CURRENT_ACCOUNT";
+    bankInfo?: {
+        bankName: string;
+        iban: string;
+        accountHolder: string;
+    };
     cargoCompany?: string;
 }
 
@@ -49,6 +55,8 @@ export const OrderConfirmationEmail = ({
     total,
     shippingAddress,
     cargoCompany,
+    paymentMethod,
+    bankInfo,
 }: OrderConfirmationEmailProps) => {
     const formatPrice = (price: number) => {
         return new Intl.NumberFormat("tr-TR", {
@@ -184,6 +192,33 @@ export const OrderConfirmationEmail = ({
                                 </Column>
                             </Row>
                         </Section>
+
+                        {paymentMethod === "BANK_TRANSFER" && bankInfo && (
+                            <Section className="bg-gray-50 rounded-lg p-6 mb-6">
+                                <Heading as="h3" className="text-lg font-bold text-gray-900 mb-4">
+                                    Banka Hesap Bilgileri
+                                </Heading>
+                                <Text className="text-gray-600 m-0 mb-4">
+                                    Lütfen ödemenizi aşağıdaki hesaba yapınız:
+                                </Text>
+                                <div className="bg-white p-4 rounded border border-gray-200">
+                                    <Text className="text-gray-900 font-bold m-0 mb-1">
+                                        {bankInfo.bankName}
+                                    </Text>
+                                    <Text className="text-gray-600 m-0 mb-2">
+                                        {bankInfo.accountHolder}
+                                    </Text>
+                                    <Text className="text-gray-900 font-mono text-lg m-0">
+                                        {bankInfo.iban}
+                                    </Text>
+                                </div>
+                                <Text className="text-red-500 text-sm mt-4 font-medium">
+                                    * Lütfen açıklama kısmına sipariş numaranızı ({orderNumber}) yazmayı unutmayınız.
+                                    <br />
+                                    * Ödemenizi 3 iş günü içinde yapmanız gerekmektedir, aksi takdirde siparişiniz iptal edilecektir.
+                                </Text>
+                            </Section>
+                        )}
 
                         <Section className="text-center">
                             <Text className="text-gray-500 text-xs">
