@@ -102,6 +102,7 @@ export const OrderConfirmationEmail = ({
                             <Section className="bg-gray-50 p-4 rounded text-center border border-gray-200">
                                 <Text className="text-sm font-bold m-0 mb-2">Havale/EFT Bilgileri</Text>
                                 <Text className="text-sm m-0">{bankInfo.bankName}</Text>
+                                <Text className="text-sm m-0 font-medium">{bankInfo.accountHolder}</Text>
                                 <Text className="text-sm m-0 font-mono select-all bg-white p-1 rounded border border-gray-200 mt-1">
                                     {bankInfo.iban}
                                 </Text>
