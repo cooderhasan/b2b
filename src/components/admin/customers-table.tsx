@@ -524,84 +524,84 @@ export function CustomersTable({
                                         </Button>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="space-y-4 border-t pt-4">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-sm font-semibold">Manuel İşlem / Bakiye Ekle</h3>
+
+                                <div className="space-y-4 border-t pt-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-sm font-semibold">Manuel İşlem / Bakiye Ekle</h3>
+                                    </div>
+                                    <AddTransactionForm
+                                        customerId={selectedCustomer.id}
+                                        onSuccess={() => {
+                                            toast.success("İşlem eklendi");
+                                            // Trigger refresh of transactions
+                                            const fetchTransactions = async () => {
+                                                const data = await getCustomerTransactions(selectedCustomer.id);
+                                                setTransactions(data);
+                                            };
+                                            fetchTransactions();
+                                        }}
+                                    />
                                 </div>
-                                <AddTransactionForm
-                                    customerId={selectedCustomer.id}
-                                    onSuccess={() => {
-                                        toast.success("İşlem eklendi");
-                                        // Trigger refresh of transactions
-                                        const fetchTransactions = async () => {
-                                            const data = await getCustomerTransactions(selectedCustomer.id);
-                                            setTransactions(data);
-                                        };
-                                        fetchTransactions();
-                                    }}
-                                />
-                            </div>
 
-                            <div className="space-y-4 border-t pt-4">
-                                <h3 className="text-sm font-semibold">Son Hesap Hareketleri</h3>
-                                <div className="border rounded-lg max-h-[300px] overflow-y-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-[100px]">Tarih</TableHead>
-                                                <TableHead>İşlem</TableHead>
-                                                <TableHead>Açıklama</TableHead>
-                                                <TableHead className="text-right">Tutar</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {transactionsLoading ? (
+                                <div className="space-y-4 border-t pt-4">
+                                    <h3 className="text-sm font-semibold">Son Hesap Hareketleri</h3>
+                                    <div className="border rounded-lg max-h-[300px] overflow-y-auto">
+                                        <Table>
+                                            <TableHeader>
                                                 <TableRow>
-                                                    <TableCell colSpan={4} className="text-center py-4">
-                                                        <Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" />
-                                                    </TableCell>
+                                                    <TableHead className="w-[100px]">Tarih</TableHead>
+                                                    <TableHead>İşlem</TableHead>
+                                                    <TableHead>Açıklama</TableHead>
+                                                    <TableHead className="text-right">Tutar</TableHead>
                                                 </TableRow>
-                                            ) : transactions.length === 0 ? (
-                                                <TableRow>
-                                                    <TableCell colSpan={4} className="text-center py-4 text-gray-500">
-                                                        Kayıt bulunamadı.
-                                                    </TableCell>
-                                                </TableRow>
-                                            ) : (
-                                                transactions.map((t: any) => (
-                                                    <TableRow key={t.id}>
-                                                        <TableCell className="text-xs">{formatDate(t.createdAt)}</TableCell>
-                                                        <TableCell>
-                                                            <Badge variant="outline" className={t.type === "DEBIT" ? "text-red-600 bg-red-50 border-red-200" : "text-green-600 bg-green-50 border-green-200"}>
-                                                                {t.type === "DEBIT" ? "Borç" : "Alacak"}
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell className="text-xs">
-                                                            <div>{t.description}</div>
-                                                            {t.documentNo && <div className="text-gray-400">Belge: {t.documentNo}</div>}
-                                                        </TableCell>
-                                                        <TableCell className={`text-right text-xs font-mono font-medium ${t.type === "DEBIT" ? "text-red-600" : "text-green-600"}`}>
-                                                            {t.type === "DEBIT" ? "-" : "+"}{formatPrice(t.amount)}
+                                            </TableHeader>
+                                            <TableBody>
+                                                {transactionsLoading ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={4} className="text-center py-4">
+                                                            <Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" />
                                                         </TableCell>
                                                     </TableRow>
-                                                ))
-                                            )}
-                                        </TableBody>
-                                    </Table>
+                                                ) : transactions.length === 0 ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                                                            Kayıt bulunamadı.
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : (
+                                                    transactions.map((t: any) => (
+                                                        <TableRow key={t.id}>
+                                                            <TableCell className="text-xs">{formatDate(t.createdAt)}</TableCell>
+                                                            <TableCell>
+                                                                <Badge variant="outline" className={t.type === "DEBIT" ? "text-red-600 bg-red-50 border-red-200" : "text-green-600 bg-green-50 border-green-200"}>
+                                                                    {t.type === "DEBIT" ? "Borç" : "Alacak"}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell className="text-xs">
+                                                                <div>{t.description}</div>
+                                                                {t.documentNo && <div className="text-gray-400">Belge: {t.documentNo}</div>}
+                                                            </TableCell>
+                                                            <TableCell className={`text-right text-xs font-mono font-medium ${t.type === "DEBIT" ? "text-red-600" : "text-green-600"}`}>
+                                                                {t.type === "DEBIT" ? "-" : "+"}{formatPrice(t.amount)}
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
                                 </div>
-                            </div>
-                        </TabsContent>
+                            </TabsContent>
                         </Tabs>
                     )}
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsOpen(false)}>
-                        Kapat
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsOpen(false)}>
+                            Kapat
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div >
     );
 }
