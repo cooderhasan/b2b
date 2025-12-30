@@ -23,6 +23,15 @@ export function ImageUpload({
     maxFiles = 1
 }: ImageUploadProps) {
     const [uploading, setUploading] = useState(false);
+    // Generate a fallback unique ID if relying on random isn't enough, but passing an id prop is better.
+    // However, since we don't want to change the API everywhere, we can construct one or use useId if available.
+    // Let's use a simple random string for now to avoid React version issues if useId isn't available,
+    // though Next.js 13+ definitely has it. Let's assume useId is fine.
+
+    // Actually, I'll use a simple approach to avoid imports if I can't verify React version easily, 
+    // but standard React hooks are safer. 
+    // Let's stick to modifying the imports too.
+    const uniqueId = "upload-" + Math.random().toString(36).substr(2, 9);
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
@@ -84,7 +93,7 @@ export function ImageUpload({
             {value.length < maxFiles && (
                 <div className="flex items-center gap-4">
                     <Label
-                        htmlFor="image-upload"
+                        htmlFor={uniqueId}
                         className={`
                             cursor-pointer
                             flex flex-col items-center justify-center
@@ -105,7 +114,7 @@ export function ImageUpload({
                             )}
                         </div>
                         <Input
-                            id="image-upload"
+                            id={uniqueId}
                             type="file"
                             accept="image/*"
                             multiple={maxFiles > 1}
