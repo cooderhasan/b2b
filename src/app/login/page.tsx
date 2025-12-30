@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { getUserRole } from "./actions";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,8 +33,9 @@ export default function LoginPage() {
             if (result?.error) {
                 toast.error("E-posta veya şifre hatalı.");
             } else {
-                // Get the user role from server action to ensure we have the latest data
-                const role = await getUserRole();
+                // Get session to check role
+                const session = await getSession();
+                const role = session?.user?.role;
 
                 if (role === "ADMIN" || role === "OPERATOR") {
                     window.location.href = "/admin";
