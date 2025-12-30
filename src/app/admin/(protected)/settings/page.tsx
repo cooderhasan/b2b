@@ -31,6 +31,7 @@ export default async function SettingsPage() {
         // Content
         aboutContent: "",
         contactContent: "",
+        googleMapsEmbedUrl: "",
 
         // Social
         facebookUrl: "",

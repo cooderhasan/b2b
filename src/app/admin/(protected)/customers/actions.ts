@@ -165,9 +165,57 @@ export async function getCustomerTransactions(userId: string) {
         take: 50,
     });
 
-    // Serialize Decimal to Number for Client Component
     return transactions.map(t => ({
         ...t,
         amount: Number(t.amount),
     }));
+}
+
+export async function addCustomerTransaction(data: {
+    userId: string;
+    type: "DEBIT" | "CREDIT";
+    amount: number;
+    description: string;
+    documentNo?: string;
+    processType: "ADJUSTMENT" | "OPENING_BALANCE" | "PAYMENT";
+}) {
+    const session = await auth();
+    if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR")) {
+        throw new Error("Unauthorized");
+    }
+
+    const { userId, type, amount, description, documentNo, processType } = data;
+
+    // Create transaction
+    await prisma.currentAccountTransaction.create({
+        data: {
+            userId,
+            type,
+            processType,
+            amount,
+            description,
+            documentNo,
+            createdBy: session.user.email,
+        },
+    });
+
+    // Update user balance/risk limits if needed (Current debt is calculated dynamically usually, 
+    // but if we had a cached field we would update it here. 
+    // The previous implementation seems to calculate on the fly or might need a schema update if we store 'currentDebt'.)
+    // *Correction*: The User model doesn't ANYWHERE have 'currentDebt'. It's likely calculated in the query.
+    // So just adding the transaction is enough for now, assuming the fetch logic sums it up.
+
+    // Log action
+    await prisma.adminLog.create({
+        data: {
+            adminId: session.user.id,
+            action: "ADD_MANUAL_TRANSACTION",
+            entityType: "User",
+            entityId: userId,
+            newData: data as unknown as import("@prisma/client").Prisma.InputJsonValue,
+        },
+    });
+
+    revalidatePath("/admin/customers");
+    return { success: true };
 }

@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
-import { OrderConfirmationEmail } from '@/components/emails/order-confirmation';
-import { AdminNewOrderEmail } from '@/components/emails/admin-new-order';
+import { OrderConfirmationEmail } from '@/emails/order-confirmation';
+import { AdminNewOrderEmail } from '@/emails/admin-new-order';
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_123456789");
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
@@ -43,7 +43,7 @@ export async function sendOrderConfirmationEmail(props: SendOrderConfirmationPro
 
     try {
         const { data, error } = await resend.emails.send({
-            from: 'Sipariş <onboarding@resend.dev>', // Update this with your verified domain later
+            from: 'Sipariş <siparis@bagajlastigi.com>',
             to: [props.to],
             subject: `Siparişiniz Alındı - #${props.orderNumber}`,
             react: OrderConfirmationEmail(props),
@@ -74,7 +74,7 @@ export async function sendAdminNewOrderEmail(props: SendAdminNewOrderProps) {
 
     try {
         const { data, error } = await resend.emails.send({
-            from: 'Sipariş Bildirim <onboarding@resend.dev>',
+            from: 'Sipariş Bildirim <siparis@bagajlastigi.com>',
             to: [ADMIN_EMAIL],
             subject: `Yeni Sipariş: #${props.orderNumber} - ${props.customerName}`,
             react: AdminNewOrderEmail(props),

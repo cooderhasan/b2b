@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Check, X, Eye, UserCheck, UserPlus, Loader2 } from "lucide-react";
 import { getUserStatusLabel, getUserStatusColor, formatDate } from "@/lib/helpers";
 import { toast } from "sonner";
-import { updateCustomerStatus, updateCustomerDiscountGroup, createCustomer, updateCustomerCreditLimit, getCustomerTransactions } from "@/app/admin/(protected)/customers/actions";
+import { updateCustomerStatus, updateCustomerDiscountGroup, createCustomer, updateCustomerCreditLimit, getCustomerTransactions, addCustomerTransaction } from "@/app/admin/(protected)/customers/actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPrice } from "@/lib/helpers";
 import { useEffect } from "react";
@@ -524,65 +524,184 @@ export function CustomersTable({
                                         </Button>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="space-y-4 border-t pt-4">
-                                    <h3 className="text-sm font-semibold">Son Hesap Hareketleri</h3>
-                                    <div className="border rounded-lg max-h-[300px] overflow-y-auto">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead className="w-[100px]">Tarih</TableHead>
-                                                    <TableHead>İşlem</TableHead>
-                                                    <TableHead>Açıklama</TableHead>
-                                                    <TableHead className="text-right">Tutar</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {transactionsLoading ? (
-                                                    <TableRow>
-                                                        <TableCell colSpan={4} className="text-center py-4">
-                                                            <Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" />
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ) : transactions.length === 0 ? (
-                                                    <TableRow>
-                                                        <TableCell colSpan={4} className="text-center py-4 text-gray-500">
-                                                            Kayıt bulunamadı.
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ) : (
-                                                    transactions.map((t: any) => (
-                                                        <TableRow key={t.id}>
-                                                            <TableCell className="text-xs">{formatDate(t.createdAt)}</TableCell>
-                                                            <TableCell>
-                                                                <Badge variant="outline" className={t.type === "DEBIT" ? "text-red-600 bg-red-50 border-red-200" : "text-green-600 bg-green-50 border-green-200"}>
-                                                                    {t.type === "DEBIT" ? "Borç" : "Alacak"}
-                                                                </Badge>
-                                                            </TableCell>
-                                                            <TableCell className="text-xs">
-                                                                <div>{t.description}</div>
-                                                                {t.documentNo && <div className="text-gray-400">Belge: {t.documentNo}</div>}
-                                                            </TableCell>
-                                                            <TableCell className={`text-right text-xs font-mono font-medium ${t.type === "DEBIT" ? "text-red-600" : "text-green-600"}`}>
-                                                                {t.type === "DEBIT" ? "-" : "+"}{formatPrice(t.amount)}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
+                            <div className="space-y-4 border-t pt-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-sm font-semibold">Manuel İşlem / Bakiye Ekle</h3>
                                 </div>
-                            </TabsContent>
+                                <AddTransactionForm
+                                    customerId={selectedCustomer.id}
+                                    onSuccess={() => {
+                                        toast.success("İşlem eklendi");
+                                        // Trigger refresh of transactions
+                                        const fetchTransactions = async () => {
+                                            const data = await getCustomerTransactions(selectedCustomer.id);
+                                            setTransactions(data);
+                                        };
+                                        fetchTransactions();
+                                    }}
+                                />
+                            </div>
+
+                            <div className="space-y-4 border-t pt-4">
+                                <h3 className="text-sm font-semibold">Son Hesap Hareketleri</h3>
+                                <div className="border rounded-lg max-h-[300px] overflow-y-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-[100px]">Tarih</TableHead>
+                                                <TableHead>İşlem</TableHead>
+                                                <TableHead>Açıklama</TableHead>
+                                                <TableHead className="text-right">Tutar</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {transactionsLoading ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={4} className="text-center py-4">
+                                                        <Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" />
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : transactions.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                                                        Kayıt bulunamadı.
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
+                                                transactions.map((t: any) => (
+                                                    <TableRow key={t.id}>
+                                                        <TableCell className="text-xs">{formatDate(t.createdAt)}</TableCell>
+                                                        <TableCell>
+                                                            <Badge variant="outline" className={t.type === "DEBIT" ? "text-red-600 bg-red-50 border-red-200" : "text-green-600 bg-green-50 border-green-200"}>
+                                                                {t.type === "DEBIT" ? "Borç" : "Alacak"}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-xs">
+                                                            <div>{t.description}</div>
+                                                            {t.documentNo && <div className="text-gray-400">Belge: {t.documentNo}</div>}
+                                                        </TableCell>
+                                                        <TableCell className={`text-right text-xs font-mono font-medium ${t.type === "DEBIT" ? "text-red-600" : "text-green-600"}`}>
+                                                            {t.type === "DEBIT" ? "-" : "+"}{formatPrice(t.amount)}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </div>
+                        </TabsContent>
                         </Tabs>
                     )}
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsOpen(false)}>
-                            Kapat
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsOpen(false)}>
+                        Kapat
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        </div >
+    );
+}
+
+function AddTransactionForm({ customerId, onSuccess }: { customerId: string, onSuccess: () => void }) {
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState({
+        type: "DEBIT" as "DEBIT" | "CREDIT",
+        processType: "OPENING_BALANCE" as "OPENING_BALANCE" | "ADJUSTMENT" | "PAYMENT",
+        amount: "",
+        description: "",
+        documentNo: ""
+    });
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!data.amount) return;
+        setLoading(true);
+        try {
+            await addCustomerTransaction({
+                userId: customerId,
+                type: data.type,
+                processType: data.processType,
+                amount: Number(data.amount),
+                description: data.description,
+                documentNo: data.documentNo
+            });
+            setData({ ...data, amount: "", description: "", documentNo: "" });
+            onSuccess();
+        } catch (error) {
+            toast.error("İşlem eklenirken hata oluştu");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="grid gap-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900/50">
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>İşlem Türü</Label>
+                    <Select value={data.type} onValueChange={(v: any) => setData({ ...data, type: v })}>
+                        <SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="DEBIT">Borç Ekle (Bakiye Artır)</SelectItem>
+                            <SelectItem value="CREDIT">Alacak Ekle (Ödeme Düş)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label>Kategori</Label>
+                    <Select value={data.processType} onValueChange={(v: any) => setData({ ...data, processType: v })}>
+                        <SelectTrigger>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="OPENING_BALANCE">Açılış Bakiyesi / Devir</SelectItem>
+                            <SelectItem value="ADJUSTMENT">Manuel Düzeltme</SelectItem>
+                            <SelectItem value="PAYMENT">Tahsilat / Ödeme</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>Tutar (TL)</Label>
+                    <Input
+                        type="number"
+                        placeholder="0.00"
+                        value={data.amount}
+                        onChange={e => setData({ ...data, amount: e.target.value })}
+                        required
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>Belge No (Opsiyonel)</Label>
+                    <Input
+                        placeholder="Evrak No"
+                        value={data.documentNo}
+                        onChange={e => setData({ ...data, documentNo: e.target.value })}
+                    />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <Label>Açıklama</Label>
+                <Input
+                    placeholder="İşlem açıklaması..."
+                    value={data.description}
+                    onChange={e => setData({ ...data, description: e.target.value })}
+                    required
+                />
+            </div>
+            <div className="flex justify-end">
+                <Button type="submit" disabled={loading} size="sm">
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    İşlemi Kaydet
+                </Button>
+            </div>
+        </form>
     );
 }

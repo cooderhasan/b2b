@@ -77,7 +77,7 @@ export default async function ContactPage() {
                     {/* Google Maps Placeholder */}
                     <div className="h-64 bg-gray-100 rounded-xl overflow-hidden relative">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3008.963364446!2d28.8!3d41.05!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDHCsDAzJzAwLjAiTiAyOMKwNDgnMDAuMCJF!5e0!3m2!1str!2str!4v1620000000000!5m2!1str!2str"
+                            src={settings.googleMapsEmbedUrl || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3008.963364446!2d28.8!3d41.05!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDHCsDAzJzAwLjAiTiAyOMKwNDgnMDAuMCJF!5e0!3m2!1str!2str!4v1620000000000!5m2!1str!2str"}
                             width="100%"
                             height="100%"
                             style={{ border: 0 }}
