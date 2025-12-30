@@ -10,6 +10,7 @@ export default async function AdminLayout({
     children: React.ReactNode;
 }) {
     const session = await auth();
+    console.log("LAYOUT_DEBUG: Session User:", session?.user?.email, "Role:", session?.user?.role);
 
     // Auth check is handled by Middleware. Redundant check here causes loops if auth() behaves differently than middleware.
     // if (!session?.user) {

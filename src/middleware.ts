@@ -17,6 +17,8 @@ export async function middleware(request: NextRequest) {
     // Admin routes - require ADMIN or OPERATOR role
     // Admin routes - require ADMIN or OPERATOR role
     if (pathname.startsWith("/admin")) {
+        console.log("MW_DEBUG: Path:", pathname, "Token:", !!token, "Role:", token?.role);
+
         // Allow access to login page for everyone, but redirect logged-in admins to dashboard
         if (pathname === "/admin/login") {
             if (token && (token.role === "ADMIN" || token.role === "OPERATOR")) {
