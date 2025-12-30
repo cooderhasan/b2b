@@ -55,7 +55,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         discountGroup: true,
                     },
                 });
-                console.log("AUTH_DEBUG: authorize found user", user ? "YES" : "NO", user?.email);
 
                 if (!user || !user.passwordHash) {
                     return null;
@@ -83,7 +82,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     ],
     callbacks: {
         async jwt({ token, user }) {
-            console.log("AUTH_DEBUG: jwt callback", { tokenExists: !!token, userExists: !!user });
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
@@ -95,7 +93,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return token;
         },
         async session({ session, token }) {
-            console.log("AUTH_DEBUG: session callback", { sessionExists: !!session, tokenExists: !!token });
             if (token && session.user) {
                 session.user.id = token.id as string;
                 session.user.role = token.role as UserRole;

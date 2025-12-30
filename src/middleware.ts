@@ -15,13 +15,8 @@ export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Admin routes - require ADMIN or OPERATOR role
+    // Admin routes - require ADMIN or OPERATOR role
     if (pathname.startsWith("/admin")) {
-        console.log("MIDDLEWARE_DEBUG: Check Admin", {
-            path: pathname,
-            hasToken: !!token,
-            role: token?.role
-        });
-
         // Allow access to login page for everyone, but redirect logged-in admins to dashboard
         if (pathname === "/admin/login") {
             if (token && (token.role === "ADMIN" || token.role === "OPERATOR")) {
@@ -31,11 +26,9 @@ export async function middleware(request: NextRequest) {
         }
 
         if (!token) {
-            console.log("MIDDLEWARE_DEBUG: No token, redirecting to login");
             return NextResponse.redirect(new URL("/admin/login", request.url));
         }
         if (token.role !== "ADMIN" && token.role !== "OPERATOR") {
-            console.log("MIDDLEWARE_DEBUG: Invalid role, redirecting to home", token.role);
             return NextResponse.redirect(new URL("/", request.url));
         }
     }

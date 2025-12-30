@@ -34,12 +34,9 @@ export default function LoginPage() {
                 toast.error("E-posta veya şifre hatalı.");
             } else {
                 // Redirect to admin - Middleware will handle non-admin users by redirecting them to home
-                // This avoids client-side role check crashes
-                alert("Giriş Başarılı! Yönlendiriliyorsunuz...");
-                window.location.href = "/"; // Temporary redirect to home to see if session exists there
+                window.location.href = "/admin";
             }
-        } catch (e) {
-            alert("Giriş Hatası: " + JSON.stringify(e));
+        } catch {
             toast.error("Bir hata oluştu.");
         } finally {
             setLoading(false);
