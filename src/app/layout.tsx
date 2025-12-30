@@ -15,10 +15,40 @@ import { Providers } from "@/components/providers/session-provider";
 //   subsets: ["latin"],
 // });
 
-export const metadata: Metadata = {
-  title: "B2B E-Ticaret Platformu",
-  description: "B2B Toptan Satış Platformu",
-};
+import { prisma } from "@/lib/db";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const generalSettings = await prisma.siteSettings.findUnique({
+    where: { key: "general" },
+  });
+
+  const brandingSettings = await prisma.siteSettings.findUnique({
+    where: { key: "branding" },
+  });
+
+  // Cast the JSON value to a typed object or any for simpler access
+  const general = (generalSettings?.value as any) || {};
+  const branding = (brandingSettings?.value as any) || {};
+
+  return {
+    title: {
+      default: general.seoTitle || general.siteName || "B2B E-Ticaret Platformu",
+      template: `%s | ${general.siteName || "B2B"}`,
+    },
+    description: general.seoDescription || "B2B Toptan Satış Platformu",
+    keywords: general.seoKeywords?.split(",") || [],
+    icons: {
+      icon: branding.faviconUrl || "/favicon.ico",
+      shortcut: branding.faviconUrl || "/favicon.ico",
+      apple: branding.faviconUrl || "/favicon.ico", // Or a specific apple touch icon if available
+    },
+    openGraph: {
+      title: general.seoTitle || general.siteName || "B2B E-Ticaret Platformu",
+      description: general.seoDescription || "B2B Toptan Satış Platformu",
+      siteName: general.siteName || "B2B",
+    },
+  };
+}
 
 export default function RootLayout({
   children,
