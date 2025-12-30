@@ -15,10 +15,13 @@ interface SendOrderConfirmationProps {
         unitPrice: number;
         lineTotal: number;
     }[];
-    subtotal: number;
-    discountAmount: number;
-    vatAmount: number;
-    total: number;
+    totalAmount: number;
+    paymentMethod: "BANK_TRANSFER" | "CREDIT_CARD" | "CURRENT_ACCOUNT";
+    bankInfo?: {
+        bankName: string;
+        iban: string;
+        accountHolder: string;
+    };
     shippingAddress: {
         address: string;
         city: string;
@@ -30,7 +33,8 @@ interface SendOrderConfirmationProps {
 interface SendAdminNewOrderProps {
     orderNumber: string;
     customerName: string;
-    total: number;
+    companyName: string;
+    totalAmount: number;
     orderId: string;
     cargoCompany?: string;
 }
@@ -46,7 +50,14 @@ export async function sendOrderConfirmationEmail(props: SendOrderConfirmationPro
             from: 'Sipariş <siparis@bagajlastigi.com>',
             to: [props.to],
             subject: `Siparişiniz Alındı - #${props.orderNumber}`,
-            react: OrderConfirmationEmail(props),
+            react: OrderConfirmationEmail({
+                orderNumber: props.orderNumber,
+                customerName: props.customerName,
+                items: props.items,
+                totalAmount: props.totalAmount,
+                paymentMethod: props.paymentMethod,
+                bankInfo: props.bankInfo,
+            }),
         });
 
         if (error) {
@@ -76,8 +87,13 @@ export async function sendAdminNewOrderEmail(props: SendAdminNewOrderProps) {
         const { data, error } = await resend.emails.send({
             from: 'Sipariş Bildirim <siparis@bagajlastigi.com>',
             to: [ADMIN_EMAIL],
-            subject: `Yeni Sipariş: #${props.orderNumber} - ${props.customerName}`,
-            react: AdminNewOrderEmail(props),
+            subject: `Yeni Sipariş: #${props.orderNumber} - ${props.companyName}`,
+            react: AdminNewOrderEmail({
+                orderNumber: props.orderNumber,
+                customerName: props.customerName,
+                companyName: props.companyName,
+                totalAmount: props.totalAmount,
+            }),
         });
 
         if (error) {

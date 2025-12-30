@@ -219,6 +219,18 @@ export async function createOrder(data: CreateOrderData) {
             return newOrder;
         });
 
+        // Fetch User Company Name for email
+        const userForEmail = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { companyName: true }
+        });
+
+        // Fetch Site Settings for Bank Info
+        const settingsRecord = await prisma.siteSettings.findUnique({
+            where: { key: "general" },
+        });
+        const settings = settingsRecord?.value as any || {};
+
         // Send confirmation email (fire and forget)
         if (session.user.email) {
             sendOrderConfirmationEmail({
@@ -232,10 +244,13 @@ export async function createOrder(data: CreateOrderData) {
                     lineTotal: item.lineTotal,
                     variantInfo: item.variantInfo || undefined,
                 })),
-                subtotal,
-                discountAmount,
-                vatAmount,
-                total,
+                totalAmount: total,
+                paymentMethod: paymentMethod,
+                bankInfo: paymentMethod === "BANK_TRANSFER" ? {
+                    bankName: settings.bankName || "",
+                    iban: settings.bankIban || "",
+                    accountHolder: settings.bankAccountHolder || "",
+                } : undefined,
                 shippingAddress: {
                     address: data.shippingAddress.address,
                     city: data.shippingAddress.city,
@@ -251,7 +266,8 @@ export async function createOrder(data: CreateOrderData) {
         sendAdminNewOrderEmail({
             orderNumber: order.orderNumber,
             customerName: data.shippingAddress.name,
-            total,
+            companyName: userForEmail?.companyName || data.shippingAddress.name, // Fallback to person name
+            totalAmount: total,
             orderId: order.id,
             cargoCompany: data.cargoCompany,
         }).catch((err) => {
