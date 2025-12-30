@@ -206,9 +206,8 @@ export function SlidersTable({ sliders }: SlidersTableProps) {
                                             >
                                                 <X className="h-4 w-4" />
                                             </button>
-                                            <Image
-                                                fill
-                                                className="object-cover"
+                                            <img
+                                                className="object-cover w-full h-full"
                                                 alt="Slider görseli"
                                                 src={imageUrl}
                                             />
