@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, getSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -33,15 +33,9 @@ export default function LoginPage() {
             if (result?.error) {
                 toast.error("E-posta veya şifre hatalı.");
             } else {
-                // Get session to check role
-                const session = await getSession();
-                const role = session?.user?.role;
-
-                if (role === "ADMIN" || role === "OPERATOR") {
-                    window.location.href = "/admin";
-                } else {
-                    window.location.href = "/";
-                }
+                // Redirect to admin - Middleware will handle non-admin users by redirecting them to home
+                // This avoids client-side role check crashes
+                window.location.href = "/admin";
             }
         } catch {
             toast.error("Bir hata oluştu.");
