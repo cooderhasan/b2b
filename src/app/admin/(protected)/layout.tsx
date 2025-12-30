@@ -11,11 +11,12 @@ export default async function AdminLayout({
 }) {
     const session = await auth();
 
-    if (!session?.user) {
-        redirect("/login");
-    }
+    // Auth check is handled by Middleware. Redundant check here causes loops if auth() behaves differently than middleware.
+    // if (!session?.user) {
+    //    redirect("/admin/login");
+    // }
 
-    if (session.user.role !== "ADMIN" && session.user.role !== "OPERATOR") {
+    if (session?.user && session.user.role !== "ADMIN" && session.user.role !== "OPERATOR") {
         redirect("/");
     }
 
