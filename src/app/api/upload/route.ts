@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
         const token = await getToken({
             req: request,
             secret: process.env.AUTH_SECRET,
+            cookieName: "next-auth.session-token", // Explicitly match the name defined in auth.ts
             secureCookie: process.env.NODE_ENV === "production",
         });
 
