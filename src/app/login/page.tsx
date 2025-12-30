@@ -35,9 +35,11 @@ export default function LoginPage() {
             } else {
                 // Redirect to admin - Middleware will handle non-admin users by redirecting them to home
                 // This avoids client-side role check crashes
-                window.location.href = "/admin";
+                alert("Giriş Başarılı! Yönlendiriliyorsunuz...");
+                window.location.href = "/"; // Temporary redirect to home to see if session exists there
             }
-        } catch {
+        } catch (e) {
+            alert("Giriş Hatası: " + JSON.stringify(e));
             toast.error("Bir hata oluştu.");
         } finally {
             setLoading(false);
