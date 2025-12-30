@@ -73,7 +73,8 @@ export function SlidersTable({ sliders }: SlidersTableProps) {
                 setImageUrl(data.url);
                 toast.success("Görsel yüklendi.");
             } else {
-                toast.error("Görsel yüklenirken hata oluştu.");
+                const data = await response.json();
+                toast.error(`Hata: ${data.error || "Bilinmeyen sunucu hatası"}`);
             }
         } catch (error) {
             console.error("Upload error", error);
