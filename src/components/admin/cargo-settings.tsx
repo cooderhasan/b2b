@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,8 +23,8 @@ interface CargoSettingsProps {
 }
 
 export function CargoSettings({ initialCompanies }: CargoSettingsProps) {
+    const router = useRouter();
     const [loading, setLoading] = useState(false);
-    // Use simple reload for now instead of complex optimistic updates for simplicity as per requirement
 
     async function handleAdd(formData: FormData) {
         setLoading(true);
@@ -30,7 +32,7 @@ export function CargoSettings({ initialCompanies }: CargoSettingsProps) {
 
         if (result.success) {
             toast.success("Kargo firması eklendi.");
-            window.location.reload(); // Simple refresh to show new data
+            router.refresh();
         } else {
             toast.error(result.error);
         }
@@ -41,7 +43,7 @@ export function CargoSettings({ initialCompanies }: CargoSettingsProps) {
         const result = await toggleCargoCompany(id, currentState);
         if (result.success) {
             toast.success("Durum güncellendi.");
-            window.location.reload();
+            router.refresh();
         } else {
             toast.error(result.error);
         }
@@ -53,7 +55,7 @@ export function CargoSettings({ initialCompanies }: CargoSettingsProps) {
         const result = await deleteCargoCompany(id);
         if (result.success) {
             toast.success("Kargo firması silindi.");
-            window.location.reload();
+            router.refresh();
         } else {
             toast.error(result.error);
         }
