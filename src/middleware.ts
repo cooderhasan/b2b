@@ -6,9 +6,7 @@ export async function middleware(request: NextRequest) {
     const token = await getToken({
         req: request,
         secret: process.env.AUTH_SECRET,
-        // Since we enforced cookie name in auth.ts, we don't strictly need to specify it here if standard,
-        // but if we used a custom name, we would.
-        // For now, let's rely on standard behavior with our explicit auth.ts config.
+        cookieName: "next-auth.session-token", // Explicitly match the name defined in auth.ts
         secureCookie: process.env.NODE_ENV === "production",
     });
 
