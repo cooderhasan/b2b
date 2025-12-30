@@ -40,7 +40,7 @@ RUN mkdir -p /app/public/uploads && chmod -R 777 /app/public/uploads
 # Set permissions
 RUN chown -R nextjs:nodejs /app
 
-USER nextjs
+# USER nextjs
 
 EXPOSE 3000
 
