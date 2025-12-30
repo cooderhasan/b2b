@@ -17,13 +17,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 interface AdminHeaderProps {
-    user: {
+    user?: {
         id: string;
         email: string;
         role: UserRole;
         status: UserStatus;
         companyName?: string | null;
-    };
+    } | null;
 }
 
 interface Notification {
@@ -69,14 +69,14 @@ export function AdminHeader({ user }: AdminHeaderProps) {
         return () => clearInterval(interval);
     }, []);
 
-    const initials = user.companyName
+    const initials = user?.companyName
         ? user.companyName
             .split(" ")
             .map((n) => n[0])
             .join("")
             .toUpperCase()
             .slice(0, 2)
-        : user.email.slice(0, 2).toUpperCase();
+        : user?.email?.slice(0, 2).toUpperCase() || "AD";
 
     return (
         <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 sm:px-6 lg:px-8 print:hidden">
@@ -152,10 +152,10 @@ export function AdminHeader({ user }: AdminHeaderProps) {
                         <DropdownMenuLabel className="font-normal">
                             <div className="flex flex-col space-y-1">
                                 <p className="text-sm font-medium leading-none">
-                                    {user.companyName || "Admin"}
+                                    {user?.companyName || "Admin"}
                                 </p>
                                 <p className="text-xs leading-none text-muted-foreground">
-                                    {user.email}
+                                    {user?.email || "admin@b2b.com"}
                                 </p>
                             </div>
                         </DropdownMenuLabel>
