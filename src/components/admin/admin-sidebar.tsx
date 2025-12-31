@@ -88,24 +88,31 @@ const menuItems = [
 export function AdminSidebar() {
     const pathname = usePathname();
     const [collapsed, setCollapsed] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
         <>
             {/* Mobile overlay */}
-            <div className="lg:hidden fixed inset-0 z-40 bg-gray-900/50 hidden" />
+            <div
+                className={cn(
+                    "fixed inset-0 z-40 bg-gray-900/50 lg:hidden",
+                    mobileOpen ? "block" : "hidden"
+                )}
+                onClick={() => setMobileOpen(false)}
+            />
 
             {/* Sidebar */}
             <aside
                 className={cn(
                     "fixed inset-y-0 left-0 z-50 flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 print:hidden",
                     collapsed ? "w-16" : "w-64",
-                    "hidden lg:flex"
+                    mobileOpen ? "flex" : "hidden lg:flex"
                 )}
             >
                 {/* Logo */}
                 <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
                     {!collapsed && (
-                        <Link href="/admin" className="flex items-center gap-2">
+                        <Link href="/admin" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
                             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                                 <span className="text-white font-bold text-sm">B2B</span>
                             </div>
@@ -118,7 +125,7 @@ export function AdminSidebar() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setCollapsed(!collapsed)}
-                        className="ml-auto"
+                        className="ml-auto hidden lg:flex"
                     >
                         <ChevronLeft
                             className={cn(
@@ -126,6 +133,15 @@ export function AdminSidebar() {
                                 collapsed && "rotate-180"
                             )}
                         />
+                    </Button>
+                    {/* Mobile Close Button */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setMobileOpen(false)}
+                        className="ml-auto lg:hidden"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
                     </Button>
                 </div>
 
@@ -140,6 +156,7 @@ export function AdminSidebar() {
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                onClick={() => setMobileOpen(false)}
                                 className={cn(
                                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                                     isActive
@@ -173,6 +190,7 @@ export function AdminSidebar() {
                 variant="outline"
                 size="icon"
                 className="lg:hidden fixed top-4 left-4 z-50 print:hidden"
+                onClick={() => setMobileOpen(true)}
             >
                 <Menu className="h-5 w-5" />
             </Button>
