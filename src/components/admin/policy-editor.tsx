@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updatePolicy } from "@/app/actions/policy";
 import { toast } from "sonner";
-import RichTextEditor from "@/components/admin/rich-text-editor";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 
 interface Policy {
     slug: string;
