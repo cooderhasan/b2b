@@ -80,7 +80,7 @@ export function AdminHeader({ user }: AdminHeaderProps) {
 
     return (
         <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 sm:px-6 lg:px-8 print:hidden">
-            <div className="flex-1">
+            <div className="flex-1 pl-12 lg:pl-0">
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Yönetim Paneli
                 </h1>
