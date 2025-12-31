@@ -4,6 +4,7 @@ import { getSiteSettings } from "@/lib/settings";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { PrintButton } from "@/components/admin/print-button";
+import { AutoPrint } from "@/components/admin/auto-print";
 
 // Helper to serialise decimals
 const toNumber = (value: any) => Number(value);
@@ -46,8 +47,8 @@ export default async function OrderPrintPage({ params }: { params: Promise<{ id:
             `}</style>
 
 
-            {/* Auto-print script */}
-            <script dangerouslySetInnerHTML={{ __html: 'window.onload = function() { window.print(); }' }} />
+            {/* Auto-print component */}
+            <AutoPrint />
 
             {/* Actions (Hidden in Print) */}
             <div className="no-print mb-8 flex justify-between items-center bg-gray-100 p-4 rounded-lg">
