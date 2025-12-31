@@ -356,3 +356,26 @@ model QuoteItem {
 
   @@map("quote_items")
 }
+
+// ==================== NEW FEATURES ====================
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
+}
+
+model Policy {
+  slug      String   @id
+  title     String
+  content   String   @db.Text // HTML content
+  updatedAt DateTime @updatedAt
+
+  @@map("policies")
+}

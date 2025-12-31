@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { getSiteSettings } from "@/lib/settings";
+import { ContactForm } from "@/components/storefront/contact-form";
 
 export default async function ContactPage() {
     const settings = await getSiteSettings();
@@ -94,33 +95,7 @@ export default async function ContactPage() {
                             <CardTitle>Bize Ulaşın</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <form className="space-y-6">
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name">Ad Soyad</Label>
-                                        <Input id="name" placeholder="Adınız Soyadınız" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">E-posta</Label>
-                                        <Input id="email" type="email" placeholder="ornek@sirket.com" />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="subject">Konu</Label>
-                                    <Input id="subject" placeholder="Mesajınızın konusu" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="message">Mesaj</Label>
-                                    <Textarea
-                                        id="message"
-                                        placeholder="Mesajınızı buraya yazınız..."
-                                        rows={6}
-                                    />
-                                </div>
-                                <Button className="w-full md:w-auto" size="lg">
-                                    Mesaj Gönder
-                                </Button>
-                            </form>
+                            <ContactForm />
                         </CardContent>
                     </Card>
                 </div>

@@ -206,6 +206,32 @@ async function main() {
 
     console.log("✅ Created slider");
 
+    // Create default policies
+    const policies = [
+        { slug: "kvkk", title: "KVKK Aydınlatma Metni" },
+        { slug: "privacy", title: "Gizlilik Politikası" },
+        { slug: "distance-sales", title: "Mesafeli Satış Sözleşmesi" },
+        { slug: "cancellation", title: "İptal ve İade Koşulları" },
+        { slug: "cookies", title: "Çerez Politikası" },
+        { slug: "membership", title: "Üyelik Sözleşmesi" },
+        { slug: "commercial-communication", title: "Ticari Elektronik İleti İzni" },
+        { slug: "payment-methods", title: "Ödeme Yöntemleri" },
+    ];
+
+    for (const policy of policies) {
+        await prisma.policy.upsert({
+            where: { slug: policy.slug },
+            update: {},
+            create: {
+                slug: policy.slug,
+                title: policy.title,
+                content: `<h3>${policy.title}</h3><p>Bu metin varsayılan olarak oluşturulmuştur. Admin panelinden düzenleyebilirsiniz.</p>`,
+            },
+        });
+    }
+
+    console.log("✅ Created policies");
+
     console.log("🎉 Seeding completed!");
 }
 
