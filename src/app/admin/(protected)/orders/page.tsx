@@ -35,7 +35,10 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     }
 
     if (status && status !== "ALL") {
-        where.status = status;
+        const normalizedStatus = status.toUpperCase();
+        if (Object.values(OrderStatus).includes(normalizedStatus as OrderStatus)) {
+            where.status = normalizedStatus as OrderStatus;
+        }
     }
 
     if (startDate || endDate) {

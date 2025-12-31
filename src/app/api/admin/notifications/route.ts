@@ -58,7 +58,7 @@ export async function GET() {
                 id: "dealers",
                 title: "Bayi Onay Bekliyor",
                 description: `${pendingDealers} üye onay bekliyor`,
-                link: "/admin/customers?status=pending",
+                link: "/admin/customers?status=PENDING",
                 type: "user",
                 count: pendingDealers
             });
@@ -80,7 +80,7 @@ export async function GET() {
                 id: "orders",
                 title: "Yeni Sipariş",
                 description: `${newOrders} yeni sipariş var`,
-                link: "/admin/orders?status=pending",
+                link: "/admin/orders?status=PENDING",
                 type: "order",
                 count: newOrders
             });
