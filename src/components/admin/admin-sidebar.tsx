@@ -18,6 +18,8 @@ import {
     AlertTriangle,
     BarChart3,
     FileQuestion,
+    Mail,
+    Scale,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -77,6 +79,16 @@ const menuItems = [
         title: "İskonto Grupları",
         href: "/admin/discount-groups",
         icon: FileText,
+    },
+    {
+        title: "Mesajlar",
+        href: "/admin/messages",
+        icon: Mail,
+    },
+    {
+        title: "Politikalar",
+        href: "/admin/policies",
+        icon: Scale,
     },
     {
         title: "Ayarlar",
