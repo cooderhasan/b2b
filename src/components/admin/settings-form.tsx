@@ -12,6 +12,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CargoSettings } from "@/components/admin/cargo-settings";
+import { Switch } from "@/components/ui/switch";
 
 interface CargoCompany {
     id: string;
@@ -322,6 +323,57 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
                                     <p className="text-sm text-amber-800 dark:text-amber-200">
                                         <strong>Not:</strong> Bu bilgiler sadece havale ile ödeme yapan müşterilere sipariş onay sayfasında gösterilecektir.
                                     </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Footer Ödeme İkonları</CardTitle>
+                                <CardDescription>
+                                    Sayfanın en alt kısmında görünecek ödeme yöntemi logoları
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-center justify-between border p-4 rounded-lg">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-base">Visa</Label>
+                                        <p className="text-sm text-gray-500">Visa logosunu göster</p>
+                                    </div>
+                                    <Switch
+                                        checked={settings.showVisa === "true"}
+                                        onCheckedChange={(checked) => updateField("showVisa", String(checked))}
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between border p-4 rounded-lg">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-base">Mastercard</Label>
+                                        <p className="text-sm text-gray-500">Mastercard logosunu göster</p>
+                                    </div>
+                                    <Switch
+                                        checked={settings.showMastercard === "true"}
+                                        onCheckedChange={(checked) => updateField("showMastercard", String(checked))}
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between border p-4 rounded-lg">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-base">Troy</Label>
+                                        <p className="text-sm text-gray-500">Troy logosunu göster</p>
+                                    </div>
+                                    <Switch
+                                        checked={settings.showTroy === "true"}
+                                        onCheckedChange={(checked) => updateField("showTroy", String(checked))}
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between border p-4 rounded-lg">
+                                    <div className="space-y-0.5">
+                                        <Label className="text-base">Havale / EFT</Label>
+                                        <p className="text-sm text-gray-500">Banka havalesi ikonunu göster</p>
+                                    </div>
+                                    <Switch
+                                        checked={settings.showBankTransfer === "true"}
+                                        onCheckedChange={(checked) => updateField("showBankTransfer", String(checked))}
+                                    />
                                 </div>
                             </CardContent>
                         </Card>

@@ -213,8 +213,6 @@ async function main() {
         { slug: "distance-sales", title: "Mesafeli Satış Sözleşmesi" },
         { slug: "cancellation", title: "İptal ve İade Koşulları" },
         { slug: "cookies", title: "Çerez Politikası" },
-        { slug: "membership", title: "Üyelik Sözleşmesi" },
-        { slug: "commercial-communication", title: "Ticari Elektronik İleti İzni" },
         { slug: "payment-methods", title: "Ödeme Yöntemleri" },
     ];
 

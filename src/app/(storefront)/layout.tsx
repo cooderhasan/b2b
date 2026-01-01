@@ -4,6 +4,7 @@ import { StorefrontHeader } from "@/components/storefront/header";
 import { StorefrontFooter } from "@/components/storefront/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { getSiteSettings } from "@/lib/settings";
+import { getAllPolicies } from "@/app/actions/policy";
 
 export default async function StorefrontLayout({
     children,
@@ -28,6 +29,8 @@ export default async function StorefrontLayout({
         },
     });
 
+    const policies = await getAllPolicies();
+
     return (
         <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
             <StorefrontHeader
@@ -42,7 +45,7 @@ export default async function StorefrontLayout({
                 linkedinUrl={settings.linkedinUrl}
             />
             <main className="flex-1">{children}</main>
-            <StorefrontFooter settings={settings} />
+            <StorefrontFooter settings={settings} policies={policies} />
         </div>
     );
 }

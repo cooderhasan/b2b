@@ -1,10 +1,23 @@
 import Link from "next/link";
 
-interface StorefrontFooterProps {
-    settings?: Record<string, string>;
+interface Policy {
+    slug: string;
+    title: string;
 }
 
-export function StorefrontFooter({ settings }: StorefrontFooterProps) {
+interface StorefrontFooterProps {
+    settings?: Record<string, string>;
+    policies?: Policy[];
+}
+
+export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) {
+    // Separate policies into groups if needed, or just list them all
+    // For now, let's put "payment-methods" apart if we want, or just filter it out from the general list if we handle it separately.
+    // User requested "Combine", so let's just list them.
+    // However, usually "Payment Methods" is a policy too.
+
+    const footerPolicies = policies?.filter(p => !["membership", "commercial-communication"].includes(p.slug)) || [];
+
     return (
         <footer className="bg-gray-900 text-gray-300">
             <div className="container mx-auto px-4 py-12">
@@ -109,11 +122,6 @@ export function StorefrontFooter({ settings }: StorefrontFooterProps) {
                                     İletişim
                                 </Link>
                             </li>
-                            <li>
-                                <Link href="/policies/payment-methods" className="hover:text-white">
-                                    Ödeme Şekilleri
-                                </Link>
-                            </li>
                         </ul>
                     </div>
 
@@ -121,31 +129,13 @@ export function StorefrontFooter({ settings }: StorefrontFooterProps) {
                     <div>
                         <h4 className="font-semibold text-white mb-4">Kurumsal</h4>
                         <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link href="/policies/kvkk" className="hover:text-white">
-                                    KVKK Metni
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/policies/privacy" className="hover:text-white">
-                                    Gizlilik Sözleşmesi
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/policies/distance-sales" className="hover:text-white">
-                                    Mesafeli Satış Sözleşmesi
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/policies/cancellation" className="hover:text-white">
-                                    İptal ve İade
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/policies/cookies" className="hover:text-white">
-                                    Çerez Politikası
-                                </Link>
-                            </li>
+                            {footerPolicies.map((policy) => (
+                                <li key={policy.slug}>
+                                    <Link href={`/policies/${policy.slug}`} className="hover:text-white">
+                                        {policy.title}
+                                    </Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 
@@ -157,24 +147,59 @@ export function StorefrontFooter({ settings }: StorefrontFooterProps) {
                             {settings?.email && <li>{settings.email}</li>}
                             {settings?.address && <li className="whitespace-pre-wrap">{settings.address}</li>}
                         </ul>
-
-
                     </div>
                 </div>
 
-                <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm space-y-1">
-                    <p>© {new Date().getFullYear()} {settings?.companyName || "B2B Toptancı"}. Tüm hakları saklıdır.</p>
-                    <p className="text-gray-500">
-                        Coded by{" "}
-                        <a
-                            href="https://www.hasandurmus.com"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-orange-500 hover:text-orange-400 transition-colors"
-                        >
-                            Hasan Durmuş
-                        </a>
-                    </p>
+                <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+                    <div className="text-gray-500 text-center md:text-left">
+                        <p>© {new Date().getFullYear()} {settings?.companyName || "B2B Toptancı"}. Tüm hakları saklıdır.</p>
+                        <p className="mt-1">
+                            Coded by{" "}
+                            <a
+                                href="https://www.hasandurmus.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-orange-500 hover:text-orange-400 transition-colors"
+                            >
+                                Hasan Durmuş
+                            </a>
+                        </p>
+                    </div>
+
+                    {/* Payment Icons */}
+                    <div className="flex items-center gap-3">
+                        {(settings?.showVisa === "true") && (
+                            <div className="bg-white rounded p-1 h-8 w-12 flex items-center justify-center">
+                                {/* Visa Icon */}
+                                <svg viewBox="0 0 48 48" className="h-full w-auto">
+                                    <path fill="#1A1F70" d="M47.8 6.5L44.4 30.6H39l2.3-24.1zM29.6 6.5L20.8 28.5l-2.6-13.6c-.5-1.9-1.9-3.2-3.8-3.2H6.9l.4 1.8c5.3 1.3 11.2 4.4 14.8 8.1l2.4 10.3h7.4l11.4-25.4h-7.7zM17.4 20.4c.5-1.5 2.6-7.8 2.6-7.8.2-1 .4-1.6.3-1.7 0 0 .5-1.8-3-2.7-1.2-.3-2.1-.5-3.3-.5-1.1 0-2 .2-2.8.4l6.2 12.3z" />
+                                </svg>
+                            </div>
+                        )}
+                        {(settings?.showMastercard === "true") && (
+                            <div className="bg-white rounded p-1 h-8 w-12 flex items-center justify-center">
+                                {/* Mastercard Icon */}
+                                <svg viewBox="0 0 24 24" className="h-full w-auto">
+                                    <path fill="#FF5F00" d="M15.245 12c0-1.658.527-3.203 1.425-4.478-1.554-1.085-3.447-1.728-5.49-1.728-5.32 0-9.638 4.318-9.638 9.638s4.318 9.638 9.638 9.638c2.043 0 3.936-.643 5.49-1.728-.898-1.275-1.425-2.82-1.425-4.478z" />
+                                    <path fill="#EB001B" d="M15.245 12c0 1.658.527 3.203 1.425 4.478 1.554 1.085 3.447 1.728 5.49 1.728 3.018 0 5.738-1.393 7.545-3.578-.34.303-.7.585-1.077.844-1.769 1.215-3.921 1.933-6.248 1.933-4.088 0-7.662-2.28-9.489-5.632.784-1.385 1.571-2.671 2.354-3.773z" />
+                                    <path fill="#F79E1B" d="M15.245 12c0-1.658.527-3.203 1.425-4.478-1.554-1.085-3.447-1.728-5.49-1.728-1.498 0-2.895.35-4.148.96 1.838 3.328 5.378 5.58 9.489 5.58 2.327 0 4.479-.718 6.248-1.933.376-.259.736-.541 1.077-.844-1.808-2.185-4.527-3.578-7.545-3.578-2.043 0-3.936.643-5.49 1.728-.898 1.275-1.425 2.82-1.425 4.478z" />
+                                </svg>
+                            </div>
+                        )}
+                        {(settings?.showTroy === "true") && (
+                            <div className="bg-white rounded p-1 h-8 w-12 flex items-center justify-center">
+                                {/* Troy Icon Placeholder - SVG needed */}
+                                <strong className="text-blue-900 text-xs font-bold">TROY</strong>
+                            </div>
+                        )}
+                        {(settings?.showBankTransfer === "true") && (
+                            <div className="bg-white rounded p-1 h-8 w-12 flex items-center justify-center" title="Havale / EFT">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-700">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
+                                </svg>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </footer>
