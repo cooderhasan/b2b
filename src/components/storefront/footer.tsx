@@ -16,7 +16,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
     // User requested "Combine", so let's just list them.
     // However, usually "Payment Methods" is a policy too.
 
-    const footerPolicies = policies?.filter(p => !["membership", "commercial-communication"].includes(p.slug)) || [];
+    const footerPolicies = policies || [];
 
     return (
         <footer className="bg-gray-900 text-gray-300">
