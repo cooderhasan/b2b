@@ -426,7 +426,7 @@ export function CustomersTable({
 
             {/* Customer Detail Dialog */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
                     <DialogHeader>
                         <DialogTitle>Müşteri Detayı</DialogTitle>
                         <DialogDescription>
@@ -434,167 +434,169 @@ export function CustomersTable({
                         </DialogDescription>
                     </DialogHeader>
 
-                    {selectedCustomer && (
-                        <Tabs defaultValue="info" className="w-full" onValueChange={setActiveTab}>
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="info">Genel Bilgiler</TabsTrigger>
-                                <TabsTrigger value="finance">Finans / Cari</TabsTrigger>
-                            </TabsList>
+                    <div className="flex-1 overflow-y-auto min-h-0 pr-2">
+                        {selectedCustomer && (
+                            <Tabs defaultValue="info" className="w-full" onValueChange={setActiveTab}>
+                                <TabsList className="grid w-full grid-cols-2 sticky top-0 z-10">
+                                    <TabsTrigger value="info">Genel Bilgiler</TabsTrigger>
+                                    <TabsTrigger value="finance">Finans / Cari</TabsTrigger>
+                                </TabsList>
 
-                            <TabsContent value="info" className="space-y-4 pt-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <p className="text-sm text-gray-500">Firma Adı</p>
-                                        <p className="font-medium">
-                                            {selectedCustomer.companyName || "-"}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500">Vergi No</p>
-                                        <p className="font-medium">
-                                            {selectedCustomer.taxNumber || "-"}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500">E-posta</p>
-                                        <p className="font-medium">{selectedCustomer.email}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500">Telefon</p>
-                                        <p className="font-medium">{selectedCustomer.phone || "-"}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500">Şehir</p>
-                                        <p className="font-medium">{selectedCustomer.city || "-"}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500">Kayıt Tarihi</p>
-                                        <p className="font-medium">
-                                            {formatDate(selectedCustomer.createdAt)}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500">Durum</p>
-                                        <Badge className={getUserStatusColor(selectedCustomer.status)}>
-                                            {getUserStatusLabel(selectedCustomer.status)}
-                                        </Badge>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-500">Toplam Sipariş</p>
-                                        <p className="font-medium">{selectedCustomer._count.orders}</p>
-                                    </div>
-                                </div>
-                            </TabsContent>
-
-                            <TabsContent value="finance" className="space-y-6 pt-4">
-                                <div className="grid grid-cols-3 gap-4">
-                                    <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                                        <p className="text-sm text-gray-500 mb-1">Toplam Kredi Limiti</p>
-                                        <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatPrice(selectedCustomer.creditLimit)}</p>
-                                    </div>
-                                    <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-lg">
-                                        <p className="text-sm text-red-500 mb-1">Güncel Borç</p>
-                                        <p className="text-lg font-bold text-red-700 dark:text-red-400">{formatPrice(selectedCustomer.currentDebt)}</p>
-                                    </div>
-                                    <div className="bg-green-50 dark:bg-green-900/10 p-4 rounded-lg">
-                                        <p className="text-sm text-green-500 mb-1">Kullanılabilir Limit</p>
-                                        <p className="text-lg font-bold text-green-700 dark:text-green-400">{formatPrice(selectedCustomer.availableLimit)}</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4 border-t pt-4">
-                                    <h3 className="text-sm font-semibold">Limit Güncelleme</h3>
-                                    <div className="flex gap-4 items-end">
-                                        <div className="space-y-2 flex-1">
-                                            <Label htmlFor="creditLimit">Kredi Limiti (TL)</Label>
-                                            <Input
-                                                id="creditLimit"
-                                                type="number"
-                                                value={newCreditLimit}
-                                                onChange={(e) => setNewCreditLimit(e.target.value)}
-                                                placeholder="0.00"
-                                            />
+                                <TabsContent value="info" className="space-y-4 pt-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-sm text-gray-500">Firma Adı</p>
+                                            <p className="font-medium">
+                                                {selectedCustomer.companyName || "-"}
+                                            </p>
                                         </div>
-                                        <Button
-                                            onClick={handleUpdateCreditLimit}
-                                            disabled={limitLoading || !newCreditLimit}
-                                        >
-                                            {limitLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                            Güncelle
-                                        </Button>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Vergi No</p>
+                                            <p className="font-medium">
+                                                {selectedCustomer.taxNumber || "-"}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">E-posta</p>
+                                            <p className="font-medium">{selectedCustomer.email}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Telefon</p>
+                                            <p className="font-medium">{selectedCustomer.phone || "-"}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Şehir</p>
+                                            <p className="font-medium">{selectedCustomer.city || "-"}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Kayıt Tarihi</p>
+                                            <p className="font-medium">
+                                                {formatDate(selectedCustomer.createdAt)}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Durum</p>
+                                            <Badge className={getUserStatusColor(selectedCustomer.status)}>
+                                                {getUserStatusLabel(selectedCustomer.status)}
+                                            </Badge>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Toplam Sipariş</p>
+                                            <p className="font-medium">{selectedCustomer._count.orders}</p>
+                                        </div>
                                     </div>
-                                </div>
+                                </TabsContent>
 
-
-                                <div className="space-y-4 border-t pt-4">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-sm font-semibold">Manuel İşlem / Bakiye Ekle</h3>
+                                <TabsContent value="finance" className="space-y-6 pt-4">
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                                            <p className="text-sm text-gray-500 mb-1">Toplam Kredi Limiti</p>
+                                            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatPrice(selectedCustomer.creditLimit)}</p>
+                                        </div>
+                                        <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-lg">
+                                            <p className="text-sm text-red-500 mb-1">Güncel Borç</p>
+                                            <p className="text-lg font-bold text-red-700 dark:text-red-400">{formatPrice(selectedCustomer.currentDebt)}</p>
+                                        </div>
+                                        <div className="bg-green-50 dark:bg-green-900/10 p-4 rounded-lg">
+                                            <p className="text-sm text-green-500 mb-1">Kullanılabilir Limit</p>
+                                            <p className="text-lg font-bold text-green-700 dark:text-green-400">{formatPrice(selectedCustomer.availableLimit)}</p>
+                                        </div>
                                     </div>
-                                    <AddTransactionForm
-                                        customerId={selectedCustomer.id}
-                                        onSuccess={() => {
-                                            toast.success("İşlem eklendi");
-                                            // Trigger refresh of transactions
-                                            const fetchTransactions = async () => {
-                                                const data = await getCustomerTransactions(selectedCustomer.id);
-                                                setTransactions(data);
-                                            };
-                                            fetchTransactions();
-                                        }}
-                                    />
-                                </div>
 
-                                <div className="space-y-4 border-t pt-4">
-                                    <h3 className="text-sm font-semibold">Son Hesap Hareketleri</h3>
-                                    <div className="border rounded-lg max-h-[300px] overflow-y-auto">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead className="w-[100px]">Tarih</TableHead>
-                                                    <TableHead>İşlem</TableHead>
-                                                    <TableHead>Açıklama</TableHead>
-                                                    <TableHead className="text-right">Tutar</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {transactionsLoading ? (
+                                    <div className="space-y-4 border-t pt-4">
+                                        <h3 className="text-sm font-semibold">Limit Güncelleme</h3>
+                                        <div className="flex gap-4 items-end">
+                                            <div className="space-y-2 flex-1">
+                                                <Label htmlFor="creditLimit">Kredi Limiti (TL)</Label>
+                                                <Input
+                                                    id="creditLimit"
+                                                    type="number"
+                                                    value={newCreditLimit}
+                                                    onChange={(e) => setNewCreditLimit(e.target.value)}
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                            <Button
+                                                onClick={handleUpdateCreditLimit}
+                                                disabled={limitLoading || !newCreditLimit}
+                                            >
+                                                {limitLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                Güncelle
+                                            </Button>
+                                        </div>
+                                    </div>
+
+
+                                    <div className="space-y-4 border-t pt-4">
+                                        <div className="flex items-center justify-between">
+                                            <h3 className="text-sm font-semibold">Manuel İşlem / Bakiye Ekle</h3>
+                                        </div>
+                                        <AddTransactionForm
+                                            customerId={selectedCustomer.id}
+                                            onSuccess={() => {
+                                                toast.success("İşlem eklendi");
+                                                // Trigger refresh of transactions
+                                                const fetchTransactions = async () => {
+                                                    const data = await getCustomerTransactions(selectedCustomer.id);
+                                                    setTransactions(data);
+                                                };
+                                                fetchTransactions();
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-4 border-t pt-4">
+                                        <h3 className="text-sm font-semibold">Son Hesap Hareketleri</h3>
+                                        <div className="border rounded-lg max-h-[300px] overflow-y-auto">
+                                            <Table>
+                                                <TableHeader>
                                                     <TableRow>
-                                                        <TableCell colSpan={4} className="text-center py-4">
-                                                            <Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" />
-                                                        </TableCell>
+                                                        <TableHead className="w-[100px]">Tarih</TableHead>
+                                                        <TableHead>İşlem</TableHead>
+                                                        <TableHead>Açıklama</TableHead>
+                                                        <TableHead className="text-right">Tutar</TableHead>
                                                     </TableRow>
-                                                ) : transactions.length === 0 ? (
-                                                    <TableRow>
-                                                        <TableCell colSpan={4} className="text-center py-4 text-gray-500">
-                                                            Kayıt bulunamadı.
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ) : (
-                                                    transactions.map((t: any) => (
-                                                        <TableRow key={t.id}>
-                                                            <TableCell className="text-xs">{formatDate(t.createdAt)}</TableCell>
-                                                            <TableCell>
-                                                                <Badge variant="outline" className={t.type === "DEBIT" ? "text-red-600 bg-red-50 border-red-200" : "text-green-600 bg-green-50 border-green-200"}>
-                                                                    {t.type === "DEBIT" ? "Borç" : "Alacak"}
-                                                                </Badge>
-                                                            </TableCell>
-                                                            <TableCell className="text-xs">
-                                                                <div>{t.description}</div>
-                                                                {t.documentNo && <div className="text-gray-400">Belge: {t.documentNo}</div>}
-                                                            </TableCell>
-                                                            <TableCell className={`text-right text-xs font-mono font-medium ${t.type === "DEBIT" ? "text-red-600" : "text-green-600"}`}>
-                                                                {t.type === "DEBIT" ? "-" : "+"}{formatPrice(t.amount)}
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {transactionsLoading ? (
+                                                        <TableRow>
+                                                            <TableCell colSpan={4} className="text-center py-4">
+                                                                <Loader2 className="h-6 w-6 animate-spin mx-auto text-gray-400" />
                                                             </TableCell>
                                                         </TableRow>
-                                                    ))
-                                                )}
-                                            </TableBody>
-                                        </Table>
+                                                    ) : transactions.length === 0 ? (
+                                                        <TableRow>
+                                                            <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                                                                Kayıt bulunamadı.
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ) : (
+                                                        transactions.map((t: any) => (
+                                                            <TableRow key={t.id}>
+                                                                <TableCell className="text-xs">{formatDate(t.createdAt)}</TableCell>
+                                                                <TableCell>
+                                                                    <Badge variant="outline" className={t.type === "DEBIT" ? "text-red-600 bg-red-50 border-red-200" : "text-green-600 bg-green-50 border-green-200"}>
+                                                                        {t.type === "DEBIT" ? "Borç" : "Alacak"}
+                                                                    </Badge>
+                                                                </TableCell>
+                                                                <TableCell className="text-xs">
+                                                                    <div>{t.description}</div>
+                                                                    {t.documentNo && <div className="text-gray-400">Belge: {t.documentNo}</div>}
+                                                                </TableCell>
+                                                                <TableCell className={`text-right text-xs font-mono font-medium ${t.type === "DEBIT" ? "text-red-600" : "text-green-600"}`}>
+                                                                    {t.type === "DEBIT" ? "-" : "+"}{formatPrice(t.amount)}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    )}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
                                     </div>
-                                </div>
-                            </TabsContent>
-                        </Tabs>
-                    )}
+                                </TabsContent>
+                            </Tabs>
+                        )}
+                    </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsOpen(false)}>
                             Kapat

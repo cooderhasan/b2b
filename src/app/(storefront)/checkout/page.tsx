@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getSiteSettings } from "@/lib/settings";
 import { CheckoutForm } from "@/components/storefront/checkout-form";
 
 export default async function CheckoutPage() {
@@ -64,5 +65,8 @@ export default async function CheckoutPage() {
         orderBy: { name: "asc" },
     });
 
-    return <CheckoutForm initialData={initialData} cargoCompanies={cargoCompanies} />;
+    const settings = await getSiteSettings();
+    const freeShippingLimit = Number(settings.freeShippingLimit) || 20000;
+
+    return <CheckoutForm initialData={initialData} cargoCompanies={cargoCompanies} freeShippingLimit={freeShippingLimit} />;
 }

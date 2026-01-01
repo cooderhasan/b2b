@@ -1,6 +1,6 @@
 import { PriceCalculation, CartItem, CartSummary } from "@/types";
 
-export const SHIPPING_FREE_LIMIT = 20000;
+export const SHIPPING_FREE_LIMIT = 20000; // DEPRECATED: Use settings.freeShippingLimit instead. Kept as fallback.
 
 /**
  * Calculate discounted price for a product based on dealer discount rate

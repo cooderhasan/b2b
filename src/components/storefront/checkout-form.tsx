@@ -37,9 +37,26 @@ interface CheckoutFormProps {
         };
     };
     cargoCompanies: { id: string; name: string }[];
+    freeShippingLimit: number;
 }
 
-export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps) {
+export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }: CheckoutFormProps) {
+    // ...
+    // Inside render:
+    <div className="flex justify-between items-center">
+        <span className="text-gray-600 dark:text-gray-400">Kargo</span>
+        <span className={`font-medium ${summary.total >= freeShippingLimit ? "text-green-600" : "text-gray-900 dark:text-gray-200"}`}>
+            {summary.total >= freeShippingLimit ? "Ücretsiz" : "Alıcı Öder"}
+        </span>
+    </div>
+    // ...
+    {
+        summary.total < freeShippingLimit && (
+            <p className="text-xs text-gray-500 mt-1">
+                +{formatPrice(freeShippingLimit - summary.total)} daha ekle, kargo bedava olsun!
+            </p>
+        )
+    }
     const router = useRouter();
     const { items, getSummary, discountRate, clearCart } = useCartStore();
     const [mounted, setMounted] = useState(false);
@@ -383,8 +400,8 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-600 dark:text-gray-400">Kargo</span>
-                                        <span className={`font-medium ${summary.total >= SHIPPING_FREE_LIMIT ? "text-green-600" : "text-gray-900 dark:text-gray-200"}`}>
-                                            {summary.total >= SHIPPING_FREE_LIMIT ? "Ücretsiz" : "Alıcı Öder"}
+                                        <span className={`font-medium ${summary.total >= freeShippingLimit ? "text-green-600" : "text-gray-900 dark:text-gray-200"}`}>
+                                            {summary.total >= freeShippingLimit ? "Ücretsiz" : "Alıcı Öder"}
                                         </span>
                                     </div>
                                 </div>
@@ -397,9 +414,9 @@ export function CheckoutForm({ initialData, cargoCompanies }: CheckoutFormProps)
                                         <div className="text-2xl font-bold text-blue-600">
                                             {formatPrice(summary.total)}
                                         </div>
-                                        {summary.total < SHIPPING_FREE_LIMIT && (
+                                        {summary.total < freeShippingLimit && (
                                             <p className="text-xs text-gray-500 mt-1">
-                                                +{formatPrice(SHIPPING_FREE_LIMIT - summary.total)} daha ekle, kargo bedava olsun!
+                                                +{formatPrice(freeShippingLimit - summary.total)} daha ekle, kargo bedava olsun!
                                             </p>
                                         )}
                                     </div>

@@ -433,7 +433,23 @@ export function SettingsForm({ initialSettings, cargoCompanies }: SettingsFormPr
 
                 {/* Independent Cargo Tab - Outside of Main Form */}
                 <TabsContent value="cargo" className="space-y-6">
-                    <CargoSettings initialCompanies={cargoCompanies} />
+                    <Card>
+                        <CardContent className="space-y-4">
+                            <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 space-y-2">
+                                <Label>Ücretsiz Kargo Limiti (TL)</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="20000"
+                                    defaultValue={settings.freeShippingLimit || "20000"}
+                                    onChange={(e) => updateField("freeShippingLimit", e.target.value)}
+                                />
+                                <p className="text-xs text-gray-500">
+                                    Sepet tutarı bu limitin üzerindeyse kargo ücretsiz olur.
+                                </p>
+                            </div>
+                            <CargoSettings initialCompanies={cargoCompanies} />
+                        </CardContent>
+                    </Card>
                 </TabsContent>
             </Tabs>
 
