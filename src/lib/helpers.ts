@@ -48,8 +48,10 @@ export function calculateCartSummary(
         // Item total (VAT inclusive)
         const itemTotal = item.listPrice * item.quantity;
 
-        // Discount amount
-        const itemDiscount = itemTotal * (discountRate / 100);
+        // Discount amount - Use item's specific discount rate
+        // If item.discountRate is defined, use it. Otherwise fallback to global discountRate (backward compatibility)
+        const effectiveRate = item.discountRate !== undefined ? item.discountRate : discountRate;
+        const itemDiscount = itemTotal * (effectiveRate / 100);
 
         // Price after discount (VAT inclusive)
         const itemDiscounted = itemTotal - itemDiscount;
