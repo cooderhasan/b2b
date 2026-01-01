@@ -39,12 +39,17 @@ async function main() {
     console.log("✅ Created discount groups:", discountGroups.length);
 
     // Create admin user
-    const adminPassword = await bcrypt.hash("admin123", 12);
+    // Create admin user
+    const adminPassword = await bcrypt.hash("Ahmet.91!Tufekci_2025*Guvenli", 12);
     const admin = await prisma.user.upsert({
-        where: { email: "admin@b2b.com" },
-        update: {},
+        where: { email: "ahmetufekci91@gmail.com" },
+        update: {
+            passwordHash: adminPassword,
+            role: "ADMIN",
+            status: "APPROVED",
+        },
         create: {
-            email: "admin@b2b.com",
+            email: "ahmetufekci91@gmail.com",
             passwordHash: adminPassword,
             companyName: "B2B Admin",
             role: "ADMIN",
