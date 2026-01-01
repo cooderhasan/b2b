@@ -42,21 +42,6 @@ interface CheckoutFormProps {
 
 export function CheckoutForm({ initialData, cargoCompanies, freeShippingLimit }: CheckoutFormProps) {
     // ...
-    // Inside render:
-    <div className="flex justify-between items-center">
-        <span className="text-gray-600 dark:text-gray-400">Kargo</span>
-        <span className={`font-medium ${summary.total >= freeShippingLimit ? "text-green-600" : "text-gray-900 dark:text-gray-200"}`}>
-            {summary.total >= freeShippingLimit ? "Ücretsiz" : "Alıcı Öder"}
-        </span>
-    </div>
-    // ...
-    {
-        summary.total < freeShippingLimit && (
-            <p className="text-xs text-gray-500 mt-1">
-                +{formatPrice(freeShippingLimit - summary.total)} daha ekle, kargo bedava olsun!
-            </p>
-        )
-    }
     const router = useRouter();
     const { items, getSummary, discountRate, clearCart } = useCartStore();
     const [mounted, setMounted] = useState(false);
