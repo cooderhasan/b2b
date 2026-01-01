@@ -93,8 +93,7 @@ export default function CartPage() {
                                             Birim fiyat:{" "}
                                             {formatPrice(
                                                 item.listPrice *
-                                                (1 - discountRate / 100) *
-                                                (1 + item.vatRate / 100)
+                                                (1 - (item.discountRate || discountRate) / 100)
                                             )}
                                         </p>
                                         <p className="text-xs text-gray-400">
@@ -157,8 +156,7 @@ export default function CartPage() {
                                             {formatPrice(
                                                 item.listPrice *
                                                 item.quantity *
-                                                (1 - discountRate / 100) *
-                                                (1 + item.vatRate / 100)
+                                                (1 - (item.discountRate || discountRate) / 100)
                                             )}
                                         </p>
                                     </div>
