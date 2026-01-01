@@ -167,33 +167,34 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                     </div>
 
                     {/* Payment Icons */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         {(settings?.showVisa === "true") && (
-                            <div className="bg-white rounded p-1 h-8 w-12 flex items-center justify-center">
-                                {/* Visa Icon */}
-                                <svg viewBox="0 0 48 48" className="h-full w-auto">
-                                    <path fill="#1A1F70" d="M47.8 6.5L44.4 30.6H39l2.3-24.1zM29.6 6.5L20.8 28.5l-2.6-13.6c-.5-1.9-1.9-3.2-3.8-3.2H6.9l.4 1.8c5.3 1.3 11.2 4.4 14.8 8.1l2.4 10.3h7.4l11.4-25.4h-7.7zM17.4 20.4c.5-1.5 2.6-7.8 2.6-7.8.2-1 .4-1.6.3-1.7 0 0 .5-1.8-3-2.7-1.2-.3-2.1-.5-3.3-.5-1.1 0-2 .2-2.8.4l6.2 12.3z" />
+                            <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center" title="Visa">
+                                <svg viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" className="h-full w-auto max-w-full">
+                                    <path fill="#1A1F71" d="M32.8,24.7h-3.3c-1.1,0-1.9,0.4-2.4,1.8l-8.4,20H12l-1.7-10.8c-0.4-1.7-1.5-3.4-3.1-4.4C5.1,30.3,2.4,29,0,29v2.2 c3.4,0.8,7.3,2.7,8.5,5.2l7.7,28.8h6.9L34.1,30L36,38.8h6.2L48,24.7H32.8z"></path>
+                                    <path fill="#1A1F71" d="M22.5,24.7h-5.2c-1.6,0-2.8,0.5-3.3,2.9l-5.6,26.6H15L17.5,37h7.2l0.7,3.5h5.4L37.8,24.7h-5.9 L22.5,24.7z M18.1,33.5l3.5-16.7h2.2L20.8,33.5H18.1z"></path>
+                                    <path fill="#1A1F71" d="M30.7,24.7l-4.5,21.3h5.2l4.5-21.3H30.7z"></path>
+                                    {/* Simplified generic Visa path - drawing VISA text */}
+                                    <path fill="#1A1F71" d="M19.9,7.6L12.5,28h4.5l1.2-3.8h5.6l0.6,3.8h3.9L24.3,7.6H19.9z M21.9,13.7l1.7,7.8h-3.6L21.9,13.7z M34.6,7.6h-4.2 l-2.6,12.7c-0.3,1.3-1.1,1.5-2,1.5h-2.9l-0.1,0.5c1.8,0.4,3.7,0.9,4.9,1.1c2.2,0.4,3.8-0.6,4.3-2.9l2.6-12.9H34.6z M48,7.6h-3.5 c-1.1,0-1.9,0.3-2.4,1.4L33.7,28h4.4l0.8-2.6c1-0.2,2.3-0.5,3.1-0.5c0.4,0,2.1,0.1,2.5,1.7l0.2,1.2h4.1L48,7.6z M5,7.6H0.1v0.7 c3,0.8,4.7,2.2,5.2,2.8l-5,23.6h4.8L12.2,7.6H5z" />
                                 </svg>
                             </div>
                         )}
                         {(settings?.showMastercard === "true") && (
-                            <div className="bg-white rounded p-1 h-8 w-12 flex items-center justify-center">
-                                {/* Mastercard Icon */}
-                                <svg viewBox="0 0 24 24" className="h-full w-auto">
-                                    <path fill="#FF5F00" d="M15.245 12c0-1.658.527-3.203 1.425-4.478-1.554-1.085-3.447-1.728-5.49-1.728-5.32 0-9.638 4.318-9.638 9.638s4.318 9.638 9.638 9.638c2.043 0 3.936-.643 5.49-1.728-.898-1.275-1.425-2.82-1.425-4.478z" />
-                                    <path fill="#EB001B" d="M15.245 12c0 1.658.527 3.203 1.425 4.478 1.554 1.085 3.447 1.728 5.49 1.728 3.018 0 5.738-1.393 7.545-3.578-.34.303-.7.585-1.077.844-1.769 1.215-3.921 1.933-6.248 1.933-4.088 0-7.662-2.28-9.489-5.632.784-1.385 1.571-2.671 2.354-3.773z" />
-                                    <path fill="#F79E1B" d="M15.245 12c0-1.658.527-3.203 1.425-4.478-1.554-1.085-3.447-1.728-5.49-1.728-1.498 0-2.895.35-4.148.96 1.838 3.328 5.378 5.58 9.489 5.58 2.327 0 4.479-.718 6.248-1.933.376-.259.736-.541 1.077-.844-1.808-2.185-4.527-3.578-7.545-3.578-2.043 0-3.936.643-5.49 1.728-.898 1.275-1.425 2.82-1.425 4.478z" />
+                            <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center" title="Mastercard">
+                                <svg viewBox="0 0 24 15" className="h-full w-auto max-w-full">
+                                    <rect fill="none" width="24" height="15" />
+                                    <circle cx="7" cy="7.5" r="7" fill="#EB001B" />
+                                    <circle cx="17" cy="7.5" r="7" fill="#F79E1B" fillOpacity="0.8" />
                                 </svg>
                             </div>
                         )}
                         {(settings?.showTroy === "true") && (
-                            <div className="bg-white rounded p-1 h-8 w-12 flex items-center justify-center">
-                                {/* Troy Icon Placeholder - SVG needed */}
-                                <strong className="text-blue-900 text-xs font-bold">TROY</strong>
+                            <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center" title="Troy">
+                                <strong className="text-blue-900 text-sm font-black tracking-tighter">TROY</strong>
                             </div>
                         )}
                         {(settings?.showBankTransfer === "true") && (
-                            <div className="bg-white rounded p-1 h-8 w-12 flex items-center justify-center" title="Havale / EFT">
+                            <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center" title="Havale / EFT">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-700">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
                                 </svg>
