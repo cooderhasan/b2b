@@ -170,12 +170,7 @@ export function StorefrontFooter({ settings, policies }: StorefrontFooterProps) 
                     <div className="flex items-center gap-2">
                         {(settings?.showVisa === "true") && (
                             <div className="bg-white rounded px-2 h-9 min-w-[3rem] flex items-center justify-center p-1" title="Visa">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 10" className="h-full w-auto">
-                                    <path fill="#142787" d="M13.8 0h2l-1.3 8h-2L13.8 0z" />
-                                    <path fill="#142787" d="M21.7 0.2c-0.6-0.3-1.6-0.5-2.6-0.5-2.9 0-4.9 1.5-4.9 3.7 0 1.6 1.4 2.5 2.5 3 1.1 0.5 1.5 0.9 1.5 1.3 0 0.7-0.9 1-1.7 1-1.1 0-1.8-0.2-2.7-0.6l-0.4 1.7c0.6 0.3 1.8 0.5 2.9 0.5 2.7 0 4.5-1.4 4.5-3.5 0-1.2-0.7-2.1-2.2-2.8-0.9-0.5-1.5-0.8-1.5-1.2 0-0.4 0.5-0.8 1.6-0.8 0.9 0 1.6 0.2 2 0.4L21.7 0.2z" />
-                                    <path fill="#142787" d="M25.7 0h-1.6c-0.5 0-0.9 0.1-1.1 0.7L19.8 8h2.1l0.4-1.2h2.6l0.2 1.2h1.9L25.7 0z M22.9 5.4l0.8-2l0.4 2H22.9z" />
-                                    <path fill="#142787" d="M8.9 0L5.9 8H3.8L2.2 2C2.1 1.7 2 1.5 1.8 1.4 1.4 1.2 0.7 0.9 0 0.8L0.1 0.2h3.1c0.4 0 0.8 0.3 0.9 0.8l0.8 4.6L7 0.2H8.9z" />
-                                </svg>
+                                <strong style={{ color: "#1A1F71", fontStyle: "italic", fontFamily: "Helvetica, Arial, sans-serif", fontSize: "1.2rem", lineHeight: 1, letterSpacing: "-0.5px", fontWeight: 900 }}>VISA</strong>
                             </div>
                         )}
                         {(settings?.showMastercard === "true") && (
