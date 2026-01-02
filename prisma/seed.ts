@@ -1,10 +1,18 @@
-import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
+    try {
+        // Try loading dotenv for local development
+        const dotenv = await import("dotenv");
+        dotenv.config();
+    } catch (e) {
+        // Ignore if dotenv is not found (e.g. in production where env vars are injected)
+        console.log("Info: dotenv not loaded (using system environment variables)");
+    }
+
     console.log("🌱 Seeding database...");
 
     // Create discount groups
