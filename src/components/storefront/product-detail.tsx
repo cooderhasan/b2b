@@ -66,6 +66,7 @@ export function ProductDetail({
     whatsappNumber,
 }: ProductDetailProps) {
     const [quantity, setQuantity] = useState(product.minQuantity);
+    const [inputValue, setInputValue] = useState(product.minQuantity.toString());
     const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const addItem = useCartStore((state) => state.addItem);
@@ -101,10 +102,42 @@ export function ProductDetail({
         product.vatRate
     );
 
-    const handleQuantityChange = (value: number) => {
-        if (value >= product.minQuantity && value <= effectiveStock) {
-            setQuantity(value);
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setInputValue(value);
+
+        // Try to update quantity for live price calculation if valid
+        const numValue = Number(value);
+        if (!isNaN(numValue) && numValue >= product.minQuantity && numValue <= effectiveStock) {
+            setQuantity(numValue);
         }
+    };
+
+    const handleInputBlur = () => {
+        let numValue = Number(inputValue);
+
+        if (isNaN(numValue)) {
+            numValue = product.minQuantity;
+        }
+
+        // Clamp value
+        if (numValue < product.minQuantity) numValue = product.minQuantity;
+        if (numValue > effectiveStock) numValue = effectiveStock;
+
+        setQuantity(numValue);
+        setInputValue(numValue.toString());
+    };
+
+    const adjustQuantity = (delta: number) => {
+        const newValue = quantity + delta;
+        if (newValue >= product.minQuantity && newValue <= effectiveStock) {
+            setQuantity(newValue);
+            setInputValue(newValue.toString());
+        }
+    };
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+        e.target.select();
     };
 
     const handleAddToCart = () => {
@@ -435,15 +468,17 @@ export function ProductDetail({
                                     <Button
                                         variant="outline"
                                         size="icon"
-                                        onClick={() => handleQuantityChange(quantity - 1)}
+                                        onClick={() => adjustQuantity(-1)}
                                         disabled={quantity <= product.minQuantity}
                                     >
                                         <Minus className="h-4 w-4" />
                                     </Button>
                                     <Input
                                         type="number"
-                                        value={quantity}
-                                        onChange={(e) => handleQuantityChange(Number(e.target.value))}
+                                        value={inputValue}
+                                        onChange={handleInputChange}
+                                        onBlur={handleInputBlur}
+                                        onFocus={handleFocus}
                                         className="w-20 text-center"
                                         min={product.minQuantity}
                                         max={product.stock}
@@ -451,8 +486,8 @@ export function ProductDetail({
                                     <Button
                                         variant="outline"
                                         size="icon"
-                                        onClick={() => handleQuantityChange(quantity + 1)}
-                                        disabled={quantity >= product.stock}
+                                        onClick={() => adjustQuantity(1)}
+                                        disabled={quantity >= effectiveStock}
                                     >
                                         <Plus className="h-4 w-4" />
                                     </Button>
