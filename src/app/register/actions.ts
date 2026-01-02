@@ -14,6 +14,7 @@ export async function registerUser(formData: FormData) {
         phone: formData.get("phone") as string,
         address: formData.get("address") as string,
         city: formData.get("city") as string,
+        district: formData.get("district") as string,
     };
 
     // Validate data
@@ -46,6 +47,7 @@ export async function registerUser(formData: FormData) {
             phone: validatedData.phone,
             address: validatedData.address,
             city: validatedData.city,
+            district: validatedData.district,
             role: "DEALER",
             status: "PENDING",
             discountGroupId: defaultGroup?.id,

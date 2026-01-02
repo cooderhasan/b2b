@@ -16,7 +16,7 @@ export const registerSchema = z.object({
     phone: z.string().min(10, "Geçerli bir telefon numarası giriniz"),
     address: z.string().min(10, "Adres en az 10 karakter olmalıdır"),
     city: z.string().min(2, "Şehir seçiniz"),
-    district: z.string().optional(),
+    district: z.string().min(2, "İlçe en az 2 karakter olmalıdır"),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Şifreler eşleşmiyor",
     path: ["confirmPassword"],
