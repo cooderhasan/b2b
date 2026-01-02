@@ -5,6 +5,7 @@ import { StorefrontFooter } from "@/components/storefront/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { getSiteSettings } from "@/lib/settings";
 import { getAllPolicies } from "@/app/actions/policy";
+import { StoreInitializer } from "@/components/store-initializer";
 
 export default async function StorefrontLayout({
     children,
@@ -31,8 +32,22 @@ export default async function StorefrontLayout({
 
     const policies = await getAllPolicies();
 
+    let userDiscountRate = 0;
+    if (session?.user?.id) {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: {
+                discountGroup: {
+                    select: { discountRate: true }
+                }
+            }
+        });
+        userDiscountRate = Number(user?.discountGroup?.discountRate || 0);
+    }
+
     return (
         <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+            <StoreInitializer discountRate={userDiscountRate} />
             <StorefrontHeader
                 user={session?.user}
                 logoUrl={settings.logoUrl}

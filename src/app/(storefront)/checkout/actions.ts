@@ -42,10 +42,23 @@ export async function createOrder(data: CreateOrderData) {
     }
 
     try {
+        // Fetch user to get the true discount rate
+        const currentUser = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: {
+                discountGroup: {
+                    select: { discountRate: true }
+                }
+            }
+        });
+
+        const effectiveDiscountRate = Number(currentUser?.discountGroup?.discountRate || 0);
+
         // Calculate totals
-        let subtotal = 0;
-        let discountAmount = 0;
-        let vatAmount = 0;
+        let subtotal = 0; // Net total (excluding VAT)
+        let totalDiscountAmount = 0;
+        let totalVatAmount = 0;
+        let grandTotal = 0; // Final payable amount
 
         // Verify products and calculate amounts
         const orderItems = await Promise.all(
@@ -88,31 +101,45 @@ export async function createOrder(data: CreateOrderData) {
                     );
                 }
 
-                const itemSubtotal = unitPrice * item.quantity;
-                const itemDiscount = itemSubtotal * (data.discountRate / 100);
-                const itemDiscounted = itemSubtotal - itemDiscount;
-                const itemVat = itemDiscounted * (product.vatRate / 100);
-                const lineTotal = itemDiscounted + itemVat;
+                // Calculation Logic (Tax Included Input)
+                // 1. Gross Line Total (Price * Qty)
+                const grossLineTotal = unitPrice * item.quantity;
 
-                subtotal += itemSubtotal;
-                discountAmount += itemDiscount;
-                vatAmount += itemVat;
+                // 2. Calculate Discount
+                const itemDiscount = grossLineTotal * (effectiveDiscountRate / 100);
+
+                // 3. Discounted Line Total (This is what the user pays)
+                const discountedLineTotal = grossLineTotal - itemDiscount;
+
+                // 4. Back-calculate VAT from the Discounted Total
+                // Formula: Price = Net * (1 + VAT%) => Net = Price / (1 + VAT%)
+                const vatRate = product.vatRate;
+                const netLineTotal = discountedLineTotal / (1 + vatRate / 100);
+                const itemVat = discountedLineTotal - netLineTotal;
+
+                // Accumulate
+                subtotal += netLineTotal;
+                totalDiscountAmount += itemDiscount;
+                totalVatAmount += itemVat;
+                grandTotal += discountedLineTotal;
 
                 return {
                     productId: product.id,
                     productName: productName,
                     quantity: item.quantity,
                     unitPrice,
-                    discountRate: data.discountRate,
+                    discountRate: effectiveDiscountRate,
                     vatRate: product.vatRate,
-                    lineTotal,
+                    lineTotal: discountedLineTotal,
                     variantId: item.variantId,
                     variantInfo: item.variantInfo,
                 };
             })
         );
 
-        const total = subtotal - discountAmount + vatAmount;
+        const total = grandTotal; // Use the accumulated grand total
+        const discountAmount = totalDiscountAmount; // For record keeping
+        const vatAmount = totalVatAmount;
         const paymentMethod = data.paymentMethod || "BANK_TRANSFER";
         const orderNumber = generateOrderNumber();
 
