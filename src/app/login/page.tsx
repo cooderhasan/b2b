@@ -152,9 +152,9 @@ export default function LoginPage() {
                 {/* Footer Text */}
                 <p className="text-center text-sm text-gray-500 mt-6">
                     Giriş yaparak{" "}
-                    <Link href="/terms" className="text-orange-600 hover:underline">Kullanım Şartları</Link>
+                    <Link href="/policies/membership" className="text-orange-600 hover:underline">Kullanım Şartları</Link>
                     {" "}ve{" "}
-                    <Link href="/privacy" className="text-orange-600 hover:underline">Gizlilik Politikası</Link>
+                    <Link href="/policies/privacy" className="text-orange-600 hover:underline">Gizlilik Politikası</Link>
                     'nı kabul etmiş olursunuz.
                 </p>
             </div>
