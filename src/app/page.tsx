@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Truck, Shield, HeadphonesIcon } from "lucide-react";
 
 async function getHomeData() {
-  const [sliders, featuredProducts, newProducts, bestSellers, categories, headerCategories] =
+  const [sliders, featuredProducts, newProducts, bestSellers, categories, headerCategories, policies] =
     await Promise.all([
       prisma.slider.findMany({
         where: { isActive: true },
@@ -53,6 +53,9 @@ async function getHomeData() {
           }
         }
       }),
+      prisma.policy.findMany({
+        select: { slug: true, title: true }
+      }),
     ]);
 
   // Helper to convert Decimal to number and Date to string
@@ -80,6 +83,7 @@ async function getHomeData() {
     bestSellers: bestSellers.map(transformProduct),
     categories: categories.map(transformCategory),
     headerCategories: headerCategories,
+    policies: policies,
   };
 }
 
@@ -227,7 +231,7 @@ export default async function HomePage() {
           )}
         </div>
       </main>
-      <StorefrontFooter settings={settings} />
+      <StorefrontFooter settings={settings} policies={data.policies} />
     </div>
   );
 }
