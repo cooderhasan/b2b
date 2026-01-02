@@ -106,9 +106,10 @@ export function ProductDetail({
         const value = e.target.value;
         setInputValue(value);
 
-        // Try to update quantity for live price calculation if valid
+        // Update quantity for live price calculation (allow any positive number during typing)
+        // Validation/Clamping happens on blur or add-to-cart
         const numValue = Number(value);
-        if (!isNaN(numValue) && numValue >= product.minQuantity && numValue <= effectiveStock) {
+        if (!isNaN(numValue) && numValue >= 0) {
             setQuantity(numValue);
         }
     };
